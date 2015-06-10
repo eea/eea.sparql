@@ -17,7 +17,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         stdout = sys.stdout
         sys.stdout = self.wfile
-        json_file = os.path.join(os.path.dirname(__file__),"sparql.xml")
+        json_file = os.path.join(os.path.dirname(__file__), "sparql.xml")
         f = open(json_file, 'r')
         json_str = f.read()
         f.close()

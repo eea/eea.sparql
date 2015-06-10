@@ -1,2 +1,2 @@
-""" Content init module 
+""" Content init module
 """

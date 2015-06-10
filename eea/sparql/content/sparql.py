@@ -422,9 +422,9 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
             _id = self.invokeFactory(type_name="Sparql", id=_id)
             ob = self[_id]
             ob.edit(
-                title          = title,
-                endpoint_url   = endpoint,
-                sparql_query   = query,
+                title=title,
+                endpoint_url=endpoint,
+                sparql_query=query,
             )
             ob._renameAfterCreation(check_auto_id=True)
             ob.invalidateWorkingResult()
@@ -432,7 +432,7 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
             if changed:
                 ob = versions.create_version(ob)
                 ob.edit(
-                    sparql_query   = query,
+                    sparql_query=query,
                 )
                 ob.invalidateWorkingResult()
 

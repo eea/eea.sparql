@@ -11,7 +11,7 @@ def migrate_sparqls(context):
     """
 
     catalog = getToolByName(context, 'portal_catalog')
-    brains = catalog.searchResults(portal_type = 'Sparql')
+    brains = catalog.searchResults(portal_type='Sparql')
 
     logger.info('Migrating %s Sparqls ...', len(brains))
     nbr_updated = 0

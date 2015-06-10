@@ -29,7 +29,7 @@ propertytype_dict = {
     sparql.XSD_BOOLEAN: "boolean",
 }
 
-class MethodResult (Method.MethodResult):
+class MethodResult(Method.MethodResult):
     """Override MethodResult with our sparql_converters"""
     def __iter__(self):
         return (sparql.unpack_row(r, convert_type=sparql_converters)
@@ -112,7 +112,7 @@ def sparql2json(data, **kwargs):
 
     columns = []
     for index, col in enumerate(cols):
-        if col.lower().endswith(":label") or col.lower()=="label":
+        if col.lower().endswith(":label") or col.lower() == "label":
             columns.append('label')
             hasLabel = True
         else:
@@ -197,7 +197,7 @@ def sparql2json(data, **kwargs):
 
     return {'items': items, 'properties': properties}
 
-def sortProperties(strJson, indent = 0):
+def sortProperties(strJson, indent=0):
     """
     In the json string set the correct order of the columns
     """
@@ -220,7 +220,7 @@ def sortProperties(strJson, indent = 0):
             newProperties.append(prop)
         newProperties.sort()
         json['properties'] = ''
-        newJsonStr = simplejson.dumps(json, indent = indent)
+        newJsonStr = simplejson.dumps(json, indent=indent)
         newPropStr = '"properties": '
         newPropStr += "{"
         for prop in newProperties:

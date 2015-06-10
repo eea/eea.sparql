@@ -25,6 +25,6 @@ def sparql_added_or_modified(obj, evt):
 
     async.queueJob(async_updateLastWorkingResults,
                     obj,
-                    scheduled_at = obj.scheduled_at,
-                    bookmarks_folder_added = bookmarks_folder_added)
+                    scheduled_at=obj.scheduled_at,
+                    bookmarks_folder_added=bookmarks_folder_added)
 

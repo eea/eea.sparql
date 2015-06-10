@@ -16,7 +16,7 @@ def restart_sparqls(context):
 
     async = getUtility(IAsyncService)
     catalog = getToolByName(context, 'portal_catalog')
-    brains = catalog.searchResults(portal_type = 'Sparql')
+    brains = catalog.searchResults(portal_type='Sparql')
 
     restarted = 0
     for brain in brains:
@@ -25,8 +25,8 @@ def restart_sparqls(context):
             obj.scheduled_at = DateTime.DateTime()
             async.queueJob(async_updateLastWorkingResults,
                             obj,
-                            scheduled_at = obj.scheduled_at,
-                            bookmarks_folder_added = False)
+                            scheduled_at=obj.scheduled_at,
+                            bookmarks_folder_added=False)
             restarted += 1
 
     message = 'Restarted %s Sparqls ...' %restarted

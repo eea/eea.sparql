@@ -15,7 +15,7 @@ def migrate_sparqls(context):
     """ Migrate sparqls for async update of last working results
     """
     catalog = getToolByName(context, 'portal_catalog')
-    brains = catalog.searchResults(portal_type = 'Sparql')
+    brains = catalog.searchResults(portal_type='Sparql')
 
     logger.info('Migrating %s Sparqls ...', len(brains))
     already_migrated = 0
@@ -40,8 +40,8 @@ def migrate_sparqls(context):
         if len(rows) == 0:
             async.queueJob(async_updateLastWorkingResults,
                 obj,
-                scheduled_at = obj.scheduled_at,
-                bookmarks_folder_added = False)
+                scheduled_at=obj.scheduled_at,
+                bookmarks_folder_added=False)
         else:
             if obj.refresh_rate != 'Once':
                 before = datetime.datetime.now(pytz.UTC)
@@ -50,8 +50,8 @@ def migrate_sparqls(context):
                                     delay,
                                     async_updateLastWorkingResults,
                                     obj,
-                                    scheduled_at = obj.scheduled_at,
-                                    bookmarks_folder_added = False)
+                                    scheduled_at=obj.scheduled_at,
+                                    bookmarks_folder_added=False)
 
     logger.info('Migrated %s Sparqls ...', len(brains) - \
                                             already_migrated - \

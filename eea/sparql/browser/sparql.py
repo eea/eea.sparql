@@ -156,7 +156,7 @@ class Sparql(BrowserView):
         result = []
         result.append(u"<style type='text/css'>")
         result.append(u"table {border-collapse: collapse }")
-        result.append( u"th, td {border:1px solid black}")
+        result.append(u"th, td {border:1px solid black}")
         result.append(u"</style>")
         result.append(u"<table>")
         result.append(u"\t<tr>")
@@ -286,7 +286,7 @@ class Sparql(BrowserView):
         timeout = max(getattr(self.context, 'timeout', 10), 10)
         try:
             with contextlib.closing(urllib2.urlopen(
-                request, timeout = timeout)) as conn:
+                request, timeout=timeout)) as conn:
                 for data in conn:
                     self.request.response.write(data)
         except Exception, err:
@@ -377,7 +377,7 @@ class SparqlBookmarkFoldersSync(BrowserView):
 
     def __call__(self):
         catalog = getToolByName(self, 'portal_catalog')
-        brains = catalog.searchResults(portal_type = 'SparqlBookmarksFolder')
+        brains = catalog.searchResults(portal_type='SparqlBookmarksFolder')
         for brain in brains:
             try:
                 brain.getObject().syncQueries()
