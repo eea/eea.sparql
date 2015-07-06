@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.4.dev0 - (unreleased)
------------------------
+4.4 - (2015-07-06)
+------------------
 * Bugfix: Added upgrade step to restart the sparql sync jobs
   [szabozo0 refs #25448]
 
