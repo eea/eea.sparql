@@ -1,13 +1,16 @@
-blockquote.sparql-query,
-blockquote.sparql-error {
-    font-family: monospace;
-    font-size: 12px;
-    white-space: pre;
+code.sparql-query, code.sparql-error {
+    display: block;
+}
+code.sparql-query>pre, code.sparql-error>pre {
+    font-size: 12px !important;
     background: #ddd !important;
+    color: #000 !important;
     border: 2px solid #bbb;
     padding:5px !important;
-    overflow:auto;
     width:100% !important;
+}
+code.sparql-error>pre {
+    border-color: #f00;
 }
 
 .sparql-query span.variable {
@@ -50,11 +53,6 @@ p.sparql-has-result .boolean {
     background: transparent url(/++resource++eea.sparql.images/rdf-icon.gif) no-repeat left center;
     position: relative;
     padding:1em 1em 1em 2em;
-}
-
-.sparql-error {
-    white-space: pre;
-    border: 2px solid #f00;
 }
 
 .row_0, .row_0 td {

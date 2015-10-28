@@ -428,7 +428,7 @@ class QuickPreview(BrowserView):
                 error = traceback.format_exc()
 
         if error:
-            return "<blockquote class='sparql-error'> %s </blockquote>" % error
+            return "<code class='sparql-error'><pre> %s </pre></code>" % error
 
         result = []
         result.append(u"<table class='sparql-results'>")

@@ -3,6 +3,8 @@ Changelog
 
 4.6.dev0 - (unreleased)
 -----------------------
+* Bugfix: use 'code/pre' tags instead of 'blockquote' for sparql queries and errors
+  [danielm-gh refs #29992]
 
 4.5 - (2015-08-18)
 ------------------
