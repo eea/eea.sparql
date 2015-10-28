@@ -22,9 +22,9 @@
   </table>
 </form>
 
-<blockquote class="sparql-query"
-            tal:condition="options/query|nothing"
-            tal:content="structure options/query"/>
+<code class="sparql-query" tal:condition="options/query|nothing">
+    <pre tal:content="structure options/query"/>
+</code>
 
 <p class="sparql-stats" tal:condition="options/data">
   Received
@@ -62,9 +62,9 @@
    
 </p>
 
-<blockquote class="sparql-error"
-            tal:condition="options/error|nothing"
-            tal:content="options/error"/>
+<code class="sparql-error" tal:condition="options/error|nothing">
+    <pre tal:content="options/error"/>
+</code>
 
 </div>
 </body>

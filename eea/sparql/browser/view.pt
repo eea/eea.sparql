@@ -96,9 +96,9 @@
       </table>
     </form>
 
-    <blockquote class="sparql-query"
-            tal:condition="options/query_with_comments|nothing"
-            tal:content="structure options/query_with_comments"/>
+    <code class="sparql-query" tal:condition="options/query_with_comments|nothing">
+        <pre tal:content="structure options/query_with_comments"/>
+    </code>
 
 
     <p class="sparql-has-result"
@@ -116,7 +116,9 @@
 
     <div tal:condition="options/error|nothing">
         <h4 style="color:red">Error when running query:</h4>
-        <blockquote class="sparql-error" tal:content="options/error"/>
+        <code class="sparql-error">
+            <pre tal:content="options/error"/>
+        </code>
     </div>
 
     <tal:block tal:condition="python: isDaviz">
