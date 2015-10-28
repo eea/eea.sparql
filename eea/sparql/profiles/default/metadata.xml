@@ -3,5 +3,6 @@
   <version>4400</version>
   <dependencies>
     <dependency>profile-eea.versions:default</dependency>
+    <dependency>profile-Products.DataGridField:default</dependency>
   </dependencies>
 </metadata>

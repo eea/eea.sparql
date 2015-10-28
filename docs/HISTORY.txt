@@ -3,6 +3,8 @@ Changelog
 
 4.6.dev0 - (unreleased)
 -----------------------
+* Bugfix: added profile dependency to Products.DataGridField
+  [szabozo0]
 * Bugfix: use 'code/pre' tags instead of 'blockquote' for sparql queries and errors
   [danielm-gh refs #29992]
 
