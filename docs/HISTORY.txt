@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.6.dev0 - (unreleased)
------------------------
+4.6 - (2015-11-03)
+------------------
 * Bugfix: added profile dependency to Products.DataGridField
   [szabozo0]
 * Bugfix: use 'code/pre' tags instead of 'blockquote' for sparql queries and errors
