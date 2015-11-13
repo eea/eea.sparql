@@ -7,6 +7,7 @@ from zope.component import getUtility
 from plone.app.async.interfaces import IAsyncService
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 import DateTime
+import transaction
 
 logger = logging.getLogger("eea.sparql.upgrades")
 
@@ -19,15 +20,26 @@ def restart_sparqls(context):
     brains = catalog.searchResults(portal_type='Sparql')
 
     restarted = 0
+    log_total = len(brains)
+    log_count = 0
+    restarted = 0
     for brain in brains:
-        obj = brain.getObject()
-        if obj.getRefresh_rate() != 'Once':
-            obj.scheduled_at = DateTime.DateTime()
-            async.queueJob(async_updateLastWorkingResults,
+        log_count += 1
+        logger.info('PATH %s::%s: %s' % (log_count, log_total, brain.getPath()))
+        # added exceptions for broken spqrql methods
+        if brain.getPath() != '/www/SITE/data-and-maps/daviz/sds/show-eunis-and-dbpedia-links-1' and.
+           brain.getPath() != '/www/SITE/sandbox/antonio-tests/aq' and.
+           brain.getPath() != '/www/SITE/sandbox/antonio-tests/aq-1' and.
+           brain.getPath() != '/www/SITE/data-and-maps/daviz/eionet/data/inspire-monitoring-and-reporting-atbe-ref-years-2011-2012':
+            obj = brain.getObject()
+            if obj.getRefresh_rate() != 'Once':
+                obj.scheduled_at = DateTime.DateTime()
+                async.queueJob(async_updateLastWorkingResults,
                             obj,
                             scheduled_at=obj.scheduled_at,
                             bookmarks_folder_added=False)
-            restarted += 1
+                restarted += 1
+                transaction.commit()
 
     message = 'Restarted %s Sparqls ...' %restarted
     logger.info(message)
