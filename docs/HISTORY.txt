@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.7.dev0 - (unreleased)
------------------------
+4.7 - (2015-11-16)
+------------------
 * Fixed: Fixed upgrade step 4400 for eea.sparql to start all async jobs for 
   sparal methods
   [szabozo0 refs #30673]
