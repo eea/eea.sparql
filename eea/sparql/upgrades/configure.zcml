@@ -2,6 +2,20 @@
   xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
   i18n_domain="eea">
 
+  <!-- 4.4 => 4.5 -->
+  <genericsetup:upgradeSteps
+    source="4400"
+    destination="4500"
+    profile="eea.sparql:default">
+
+    <genericsetup:upgradeDepends
+      title="Import changes: add entry in Control Panel to view sparqls sync status"
+      import_profile="eea.sparql:default"
+      import_steps="controlpanel"
+      />
+
+  </genericsetup:upgradeSteps>
+
   <!-- 3.7 => 4.4 -->
   <genericsetup:upgradeSteps
     source="3700"

@@ -4,6 +4,14 @@
     i18n_domain="eea.sparql">
 
     <browser:page
+        name="sparql-schedule-controlpanel"
+        for="zope.interface.Interface"
+        class=".controlpanel.ScheduleStatus"
+        template="schedule_status.pt"
+        permission="cmf.ManagePortal"
+        />
+
+    <browser:page
         for="*"
         name="test_query"
         class=".sparql.Sparql"

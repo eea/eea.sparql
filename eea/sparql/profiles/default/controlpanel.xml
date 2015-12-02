@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<object name="portal_controlpanel">
+  <configlet
+    title="EEA Sparql Schedule Status"
+    action_id="eea.sparql"
+    icon_expr="string:$portal_url/++resource++eea.sparql.images/rdf-icon.gif"
+    appId="eea.sparql"
+    category="Products"
+    condition_expr=""
+    url_expr="string:${portal_url}/@@sparql-schedule-controlpanel"
+    visible="True">
+    <permission>Manage portal</permission>
+  </configlet>
+</object>

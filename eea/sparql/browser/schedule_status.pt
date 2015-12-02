@@ -1,0 +1,56 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xml:lang="en" lang="en"
+      metal:use-macro="context/prefs_main_template/macros/master"
+      i18n:domain="plone">
+    <body>
+        <div metal:fill-slot="prefs_configlet_main">
+            <h1 class="documentFirstHeading">Sparql Async Queue Status</h1>
+            <p class="discreet">Details about sparql queries and their async queue status.</p>
+
+            <table class="listing">
+                <thead>
+                    <tr>
+                        <th>Sparql Name</th>
+                        <th>Refresh Rate</th>
+                        <th>Queue Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr tal:repeat="sparql view/getSparqlStatus">
+                        <td><a tal:attributes="href sparql/url" tal:content="sparql/title"></a></td>
+                        <td tal:content="sparql/rrate"></td>
+                        <td>
+                            <tal:sched condition="sparql/scheduled_for">
+                                Scheduled for <tal:inner tal:content="sparql/scheduled_for"></tal:inner>
+                            </tal:sched>
+                            <tal:nosched condition="not:sparql/scheduled_for">
+                                Error
+                            </tal:nosched>
+                        </td>
+                        <td>
+                            <tal:action condition="not:sparql/scheduled_for">
+                                <form method="POST" enctype="multipart/form-data"
+                                    tal:attributes="action string:${here/absolute_url}/@@sparql-schedule-controlpanel">
+                                    <input type="hidden" name="sparql_ob_path" tal:attributes="value sparql/path"/>
+                                    <input type="submit" value="Schedule now"/>
+                                </form>
+                            </tal:action>
+                            <tal:noaction condition="sparql/scheduled_for">
+                                -
+                            </tal:noaction>
+                        </td>
+                    </tr>
+                    <tr tal:condition="not:view/getSparqlStatus">
+                        <td colspan=4>
+                            There are no sparql queries having a refresh rate other than &quot;Once&quot;.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
