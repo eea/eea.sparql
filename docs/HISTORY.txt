@@ -1,6 +1,9 @@
 Changelog
 =========
 
+4.9.dev0 - (unreleased)
+-----------------------
+
 4.8 - (2015-12-07)
 ------------------
 * Feature: Add a Control Panel entry to show the async queue status of sparql queries
