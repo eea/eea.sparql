@@ -1,10 +1,11 @@
+""" Control panel
+"""
 from Products.Five import BrowserView
 from zope.component import getUtility
 from plone.app.async.interfaces import IAsyncService
 from zc.async.interfaces import COMPLETED
 from Products.CMFCore.utils import getToolByName
 import DateTime
-from datetime import datetime
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 import logging
 

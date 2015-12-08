@@ -3,6 +3,8 @@ Changelog
 
 4.9.dev0 - (unreleased)
 -----------------------
+* Bug fix: fixed pylint warnings. Fixed HISTORY.txt markup
+  [ghicaale refs #30813]
 
 4.8 - (2015-12-07)
 ------------------
@@ -11,15 +13,15 @@ Changelog
 
 4.7 - (2015-11-16)
 ------------------
-* Fixed: Fixed upgrade step 4400 for eea.sparql to start all async jobs for 
+* Bug fix: Fixed upgrade step 4400 for eea.sparql to start all async jobs for 
   sparal methods
   [szabozo0 refs #30673]
 
 4.6 - (2015-11-03)
 ------------------
-* Bugfix: added profile dependency to Products.DataGridField
+* Bug fix: added profile dependency to Products.DataGridField
   [szabozo0]
-* Bugfix: use 'code/pre' tags instead of 'blockquote' for sparql queries and errors
+* Bug fix: use 'code/pre' tags instead of 'blockquote' for sparql queries and errors
   [danielm-gh refs #29992]
 
 4.5 - (2015-08-18)
@@ -30,20 +32,20 @@ Changelog
 
 4.4 - (2015-07-06)
 ------------------
-* Bugfix: Added upgrade step to restart the sparql sync jobs
+* Bug fix: Added upgrade step to restart the sparql sync jobs
   [szabozo0 refs #25448]
 
 4.3 - (2015-05-15)
 ------------------
-* Bugfix: Fixed a conflict between provenance info for sparql and arguments for sparql queries
+* Bug fix: Fixed a conflict between provenance info for sparql and arguments for sparql queries
   [szabozo0 refs #25341]
 
 4.2 - (2015-05-05)
 ------------------
-* Bugfix: updateLastWorkingResults now checks for Querytimeout exception
+* Bug fix: updateLastWorkingResults now checks for Querytimeout exception
   in order to avoid crash of async_updateLastWorkingResults
   [ichimdav refs #25018]
-* Bugfix: quote the query when user tries to download the dataset
+* Bug fix: quote the query when user tries to download the dataset
   [szabozo0]
 * Change: endpoint_url now uses the isURL validator in order to
   ensure that the endpoint url is a proper link
@@ -82,9 +84,9 @@ Changelog
   [pasoviul refs #19537]
 * Feature: changed dropdown values to labels insted of URIs
   [pasoviul refs #19537]
-* Bugfix: fixed error on 'Test and preview query'
+* Bug fix: fixed error on 'Test and preview query'
   [pasoviul refs #19537]
-* Bugfix: fixed argument handling between sparq and ZSPARQL
+* Bug fix: fixed argument handling between sparq and ZSPARQL
   [pasoviul refs #19537]
 * Change: updated sparqls to provide queries for arguments, besides names and types
   [pasoviul refs #19537]
@@ -129,7 +131,7 @@ Changelog
 
 3.0 - (2013-11-20)
 ------------------
-* Bugfix: Fixed syncing of sparql bookmark folders
+* Bug fix: Fixed syncing of sparql bookmark folders
   [szabozo0 refs #17260]
 
 2.9 - (2013-08-08)
@@ -158,7 +160,7 @@ Changelog
 ------------------
 * Feature: Removed lovely.memcached dependency
   [voineali refs #14343]
-* Bugfix: Fixed preview for sparql queries when arguments are missing
+* Bug fix: Fixed preview for sparql queries when arguments are missing
   [szabozo0 #14349]
 * Bug fix: conform to latest eea.versions api changes
   [tiberich #14008]
