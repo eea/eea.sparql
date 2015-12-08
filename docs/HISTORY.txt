@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.9.dev0 - (unreleased)
------------------------
+4.9 - (2015-12-08)
+------------------
 * Bug fix: fixed pylint warnings. Fixed HISTORY.txt markup
   [ghicaale refs #30813]
 
