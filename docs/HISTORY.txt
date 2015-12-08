@@ -1,6 +1,9 @@
 Changelog
 =========
 
+5.0.dev0 - (unreleased)
+-----------------------
+
 4.9 - (2015-12-08)
 ------------------
 * Bug fix: fixed pylint warnings. Fixed HISTORY.txt markup
