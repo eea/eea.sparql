@@ -3,6 +3,11 @@ Changelog
 
 5.0.dev0 - (unreleased)
 -----------------------
+* Feature: improved the "SPARQL Schedule Status" control panel view - only the
+  unscheduled sparqls are displayed, and they can be restarted all at once (not
+  only individually). Also added a method which can be used to notify by e-mail
+  the development team about unqueued sparql queries.
+  [danielm-gh refs #31031]
 
 4.9 - (2015-12-08)
 ------------------

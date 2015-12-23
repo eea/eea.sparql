@@ -3,110 +3,213 @@
 from Products.Five import BrowserView
 from zope.component import getUtility
 from plone.app.async.interfaces import IAsyncService
-from zc.async.interfaces import COMPLETED
 from Products.CMFCore.utils import getToolByName
 import DateTime
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 import logging
+import inspect
+from Products.CMFCore.permissions import ManagePortal
+from AccessControl import getSecurityManager, Unauthorized
 
 class ScheduleStatus(BrowserView):
     """ Async Schedule Status of Sparql Queries
     """
 
     def __call__(self):
+        self.logger = logging.getLogger("eea.sparql")
         self.async_service = getUtility(IAsyncService)
-        self.catalog = getToolByName(self.context, 'portal_catalog')
-        self.brains = self.catalog.searchResults(portal_type='Sparql')
+        self.p_catalog = getToolByName(self.context, 'portal_catalog')
+        self.spq_brains = self.p_catalog.searchResults(portal_type='Sparql')
 
-        ob_path = self.request.get('sparql_ob_path', '')
-        if ob_path:
-            self.restartSparql(ob_path)
+        if not self.request.get('check_sendmail', None):
+            sm = getSecurityManager()
+            if not sm.checkPermission(ManagePortal, self.context):
+                raise Unauthorized(
+                        "You are not authorized to access this resource.")
 
-        self.updSparqlDetails()
-        self.updQueueDetails()
+        start_spq_path = self.request.get('start_spq_path', None)
+        if start_spq_path:
+            self.restartSparql(start_spq_path)
 
-        return super(ScheduleStatus, self).__call__()
+        self.updUnqSparqls()
 
-    def updSparqlDetails(self):
-        """Retrieves and stores details about sparql queries
-        which have a repeatable refresh rate
+        if self.request.get('start_all_spq', None):
+            self.startAllUnqSparqls()
+
+        self.updUnqSparqlStatus()
+
+        if self.request.get('check_sendmail', None):
+            return self.checkAllUnqSparqls()
+        else:
+            return self.index()
+
+    def getAsyncJobs(self):
+        """Returns the jobs from the async queue which are either
+        queued or active
         """
-
-        self.sparql_details = {}
-
-        ob_path = None
-        for brain in self.brains:
-            ob = brain.getObject()
-            if ob.refresh_rate != 'Once':
-                ob_path = brain.getPath()
-                self.sparql_details[ob_path] = {
-                    'ob_title':brain.Title,
-                    'ob_url':brain.getURL(),
-                    'ob_rrate':ob.refresh_rate,
-                    'ob_scheduled_at':ob.scheduled_at
-                    }
-
-    def updQueueDetails(self):
-        """Retrieves and stores details about sparql queued jobs"""
-
-        self.queue_details = {}
 
         async_queue = self.async_service.getQueues()['']
 
-        ob_path = None
+        # queued jobs
         for job in async_queue:
-            if job.status != COMPLETED:
-                ob_path = '/'.join(job.args[0])
-                self.queue_details[ob_path] = {
-                    'job_status':job.status,
-                    'job_scheduled_at':job.begin_after
-                    }
+            yield job
 
-    def getSparqlStatus(self):
-        """Returns the view's results"""
+        # active jobs
+        for disp in async_queue.dispatchers.values():
+            for agent in disp.values():
+                for job in agent:
+                    yield job
 
-        sparqls = set(self.sparql_details.keys())
-        jobs = set(self.queue_details.keys())
-
-        sparql_jobs = sparqls.intersection(jobs)
-
-        results = []
-        tmp_status = {}
-
-        local_zone = DateTime.DateTime().asdatetime().tzinfo
-
-        for ob_path in sparqls:
-            tmp_status = {
-                'path': ob_path,
-                'title': self.sparql_details[ob_path]['ob_title'],
-                'url': self.sparql_details[ob_path]['ob_url'],
-                'rrate': self.sparql_details[ob_path]['ob_rrate'],
-                'scheduled_for': None
-                }
-            if ob_path in sparql_jobs:
-                tmp_status['scheduled_for'] = \
-                    self.queue_details[ob_path]['job_scheduled_at'].\
-                    astimezone(local_zone).strftime('%Y-%m-%d, %I:%M:%S %p')
-
-            results.append(tmp_status)
-
-        return results
-
-    def restartSparql(self, ob_path):
-        """Updates the results of a sparql query and schedules it in the
-        async queue; the argument is the relative path of sparql object
+    def getSparqlAsyncJobs(self):
+        """Returns the sparql jobs from the async queue which are either
+        queued or active
         """
 
-        brains = self.catalog.searchResults(portal_type='Sparql', path=ob_path)
-        brain = brains[0]
-        obj = brain.getObject()
+        portal_path = self.context.getPhysicalPath()
 
-        logger = logging.getLogger("eea.sparql")
+        for job in self.getAsyncJobs():
+            if len(job.args) == 0:
+                continue
+            job_context = job.args[0]
+            if type(job_context) == tuple and \
+                    job_context[:len(portal_path)] == portal_path:
+                job_argnames = inspect.getargspec(job.callable).args
+                for argn, argv in zip(job_argnames, job.args):
+                    if argn != 'func':
+                        continue
+                    elif argv.func_name == 'async_updateLastWorkingResults':
+                        yield job
 
-        if obj and obj.getRefresh_rate() != 'Once':
-            obj.scheduled_at = DateTime.DateTime()
-            logger.info('[Restarting Sparql]: %s', brain.getURL())
-            self.async_service.queueJob(async_updateLastWorkingResults,
-                                    obj,
-                                    scheduled_at=obj.scheduled_at,
-                                    bookmarks_folder_added=False)
+    def updUnqSparqls(self):
+        """Retrieves and stores details about sparql queries
+        which have a repeatable refresh rate, and which are not
+        in the async queue
+        """
+
+        # paths of queued sparqls
+        q_sparql_paths = set()
+
+        for job in self.getSparqlAsyncJobs():
+            spq_path = '/'.join(job.args[0])
+            if spq_path not in q_sparql_paths:
+                q_sparql_paths.add(spq_path)
+
+        # details of unqueued sparqls
+        self.unq_sparqls = {}
+
+        for brain in self.spq_brains:
+            spq_path = brain.getPath()
+            if spq_path not in q_sparql_paths:
+                spq_ob = brain.getObject()
+                if spq_ob.refresh_rate != 'Once':
+                    self.unq_sparqls[spq_path] = {
+                        'spq_title':brain.Title,
+                        'spq_url':brain.getURL(),
+                        'spq_rrate':spq_ob.refresh_rate
+                        }
+
+    def restartSparql(self, spq_path):
+        """Refreshes a sparql query and schedules it in the async queue;
+        the argument is the relative path of sparql object
+        """
+
+        spq_brain = self.p_catalog.searchResults(portal_type='Sparql',
+                                                  path=spq_path)[0]
+        spq_ob = spq_brain.getObject()
+
+        if spq_ob and spq_ob.getRefresh_rate() != 'Once':
+            spq_ob.scheduled_at = DateTime.DateTime()
+            self.logger.info('[Restarting Sparql]: %s', spq_brain.getURL())
+            try:
+                self.async_service.queueJob(async_updateLastWorkingResults,
+                                        spq_ob,
+                                        scheduled_at=spq_ob.scheduled_at,
+                                        bookmarks_folder_added=False)
+            except Exception, e:
+                self.logger.error("Got exception %s when restarting sparql %s",
+                                      e, spq_brain.getURL())
+
+    def updUnqSparqlStatus(self):
+        """Updates the variable 'unq_sparql_status' which stores the view's
+        main output
+        """
+
+        self.unq_sparql_status = []
+
+        # paths of unqueued sparqls
+        unq_sparql_paths = set(self.unq_sparqls.keys())
+
+        for spq_path in unq_sparql_paths:
+            self.unq_sparql_status.append({
+                'path': spq_path,
+                'title': self.unq_sparqls[spq_path]['spq_title'],
+                'url': self.unq_sparqls[spq_path]['spq_url'],
+                'rrate': self.unq_sparqls[spq_path]['spq_rrate']
+                })
+
+    def getUnqSparqlStatus(self):
+        """Returns the view's main output; getter for
+        'self.unq_sparql_status'
+        """
+
+        return self.unq_sparql_status
+
+    def startAllUnqSparqls(self):
+        """Refreshes all sparql queries which are not in the async queue and
+        schedules them in the queue
+        """
+
+        # paths of unqueued sparqls
+        unq_sparql_paths = set(self.unq_sparqls.keys())
+
+        if len(unq_sparql_paths) == 0:
+            return None
+
+        for spq_path in unq_sparql_paths:
+            self.restartSparql(spq_path)
+
+        self.updUnqSparqls()
+
+    def checkAllUnqSparqls(self):
+        """Checks for sparql queries not in the async queue and sends
+        a notification e-mail if unqueued sparqls are found
+        """
+
+        cnt_unq_sparqls = len(self.unq_sparql_status)
+
+        if cnt_unq_sparqls == 0:
+            return_msg = "No unqueued sparqls found. E-mail not sent."
+            return return_msg
+
+        mailhost = getToolByName(self.context, "MailHost")
+
+        email_from = "no-reply@eea.europa.eu"
+ 
+        portal_props = getToolByName(self.context, 'portal_properties')
+        site_props = getattr(portal_props, 'site_properties')
+        email_to = getattr(site_props, 'development_team_email')
+
+        subject = "[EEA Sparql Status] " + \
+                  str(cnt_unq_sparqls) + " unqueued sparqls"
+        body = str(cnt_unq_sparqls) + \
+                    " sparql queries are not scheduled in the async queue:\n"
+
+        for row in self.unq_sparql_status:
+            body += "\n* " + row['title'] + " <" + row['url'] + ">"
+        body += \
+            "\n\nYou can restart them from here: EEA Sparql Schedule Status <" \
+            + self.context.absolute_url() + "/@@sparql-schedule-controlpanel>\n"
+
+        return_msg = "Found unqueued sparqls. "
+
+        try:
+            self.logger.info('Sending e-mail to %s', email_to)
+            mailhost.send(mfrom = email_from, mto = email_to,
+                subject = subject, messageText = body)
+        except Exception, e:
+            self.logger.error("Got exception %s for %s", e, email_to)
+            return_msg += "Error raised while attempting to send e-mail. "
+
+        return_msg += "E-mail sent. "
+
+        return return_msg

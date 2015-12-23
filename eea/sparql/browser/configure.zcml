@@ -8,7 +8,7 @@
         for="zope.interface.Interface"
         class=".controlpanel.ScheduleStatus"
         template="schedule_status.pt"
-        permission="cmf.ManagePortal"
+        permission="zope.Public"
         />
 
     <browser:page
