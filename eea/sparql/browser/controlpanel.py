@@ -71,7 +71,7 @@ class ScheduleStatus(BrowserView):
             if len(job.args) == 0:
                 continue
             job_context = job.args[0]
-            if type(job_context) == tuple and \
+            if isinstance(job_context, tuple) and \
                     job_context[:len(portal_path)] == portal_path:
                 job_argnames = inspect.getargspec(job.callable).args
                 for argn, argv in zip(job_argnames, job.args):
@@ -184,7 +184,7 @@ class ScheduleStatus(BrowserView):
         mailhost = getToolByName(self.context, "MailHost")
 
         email_from = "no-reply@eea.europa.eu"
- 
+
         portal_props = getToolByName(self.context, 'portal_properties')
         site_props = getattr(portal_props, 'site_properties')
         email_to = getattr(site_props, 'development_team_email')
@@ -204,8 +204,8 @@ class ScheduleStatus(BrowserView):
 
         try:
             self.logger.info('Sending e-mail to %s', email_to)
-            mailhost.send(mfrom = email_from, mto = email_to,
-                subject = subject, messageText = body)
+            mailhost.send(mfrom=email_from, mto=email_to,
+                subject=subject, messageText=body)
         except Exception, e:
             self.logger.error("Got exception %s for %s", e, email_to)
             return_msg += "Error raised while attempting to send e-mail. "
