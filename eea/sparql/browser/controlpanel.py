@@ -171,14 +171,15 @@ class ScheduleStatus(BrowserView):
         self.updUnqSparqls()
 
     def checkAllUnqSparqls(self):
-        """Checks for sparql queries not in the async queue and sends
-        a notification e-mail if unqueued sparqls are found
+        """Checks for sparql queries not in the async queue. If found, sends a
+        notification e-mail to the development team, and then schedules the
+        stopped queries in the async queue
         """
 
         cnt_unq_sparqls = len(self.unq_sparql_status)
 
         if cnt_unq_sparqls == 0:
-            return_msg = "No unqueued sparqls found. E-mail not sent."
+            return_msg = "No unqueued sparql queries found. E-mail not sent."
             return return_msg
 
         mailhost = getToolByName(self.context, "MailHost")
@@ -190,17 +191,18 @@ class ScheduleStatus(BrowserView):
         email_to = getattr(site_props, 'development_team_email')
 
         subject = "[EEA Sparql Status] " + \
-                  str(cnt_unq_sparqls) + " unqueued sparqls"
-        body = str(cnt_unq_sparqls) + \
-                    " sparql queries are not scheduled in the async queue:\n"
+                  str(cnt_unq_sparqls) + " unqueued sparql queries"
+        body = "Found " + str(cnt_unq_sparqls) + \
+                    " sparql queries not scheduled in the async queue:\n"
 
         for row in self.unq_sparql_status:
             body += "\n* " + row['title'] + " <" + row['url'] + ">"
-        body += \
-            "\n\nYou can restart them from here: EEA Sparql Schedule Status <" \
-            + self.context.absolute_url() + "/@@sparql-schedule-controlpanel>\n"
+        body += "\n\nRestarting them ...\n\n" + \
+            "Details about the current stopped queries can be found here: " + \
+            "EEA Sparql Schedule Status <"  + \
+            self.context.absolute_url() + "/@@sparql-schedule-controlpanel>\n"
 
-        return_msg = "Found unqueued sparqls. "
+        return_msg = "Found unqueued sparql queries. "
 
         try:
             self.logger.info('Sending e-mail to %s', email_to)
@@ -209,7 +211,9 @@ class ScheduleStatus(BrowserView):
         except Exception, e:
             self.logger.error("Got exception %s for %s", e, email_to)
             return_msg += "Error raised while attempting to send e-mail. "
+        else:
+            return_msg += "E-mail sent. "
 
-        return_msg += "E-mail sent. "
+        self.startAllUnqSparqls()
 
         return return_msg
