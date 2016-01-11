@@ -131,7 +131,7 @@ SparqlBaseSchema = atapi.Schema((
         widget=SelectionWidget(
             label="Refresh the results",
         ),
-        default='Daily',
+        default='Weekly',
         required=1,
         vocabulary=['Once', 'Hourly', 'Daily', 'Weekly'],
     ),
@@ -324,7 +324,7 @@ def async_updateLastWorkingResults(obj,
     if obj.scheduled_at == scheduled_at:
         obj.updateLastWorkingResults()
 
-        refresh_rate = getattr(obj, "refresh_rate", "Daily")
+        refresh_rate = getattr(obj, "refresh_rate", "Weekly")
 
         if (len(obj.cached_result.get('result', {}).get('rows', {})) == 0) and \
             (refresh_rate == 'Once'):

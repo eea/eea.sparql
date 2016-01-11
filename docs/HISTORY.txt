@@ -3,6 +3,9 @@ Changelog
 
 5.1.dev0 - (unreleased)
 -----------------------
+* Feature: changed the default refresh rate for new Sparql objects from "Daily"
+  to "Weekly"
+  [danielm-gh refs #31723]
 * Feature: improved the "SPARQL Schedule Status" control panel view - after the
   e-mail notification about the unqueued sparql queries, the stopped ones are
   restarted
