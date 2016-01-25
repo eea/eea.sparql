@@ -11,6 +11,7 @@ from AccessControl.SecurityManagement import setSecurityManager
 
 from zope.interface import implements
 from zope.component import getUtility
+from zope.annotation import IAnnotations
 
 from zope.event import notify
 
@@ -46,6 +47,8 @@ from eea.sparql.events import SparqlBookmarksFolderAdded
 
 from eea.versions.interfaces import IVersionEnhanced, IGetVersions
 from eea.versions import versions
+
+from plone.app.blob.field import BlobField
 
 
 SparqlBaseSchema = atapi.Schema((
@@ -126,6 +129,15 @@ SparqlBaseSchema = atapi.Schema((
         required=0,
 
     ),
+
+    BlobField(
+        name='sparql_blob_results',
+        widget=TextAreaWidget(
+            label="Results",
+            visible={'edit':'invisible', 'view':'invisible'}
+        ),
+        required=0,
+    ),
     StringField(
         name='refresh_rate',
         widget=SelectionWidget(
@@ -205,7 +217,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     security.declareProtected(view, 'invalidateWorkingResult')
     def invalidateWorkingResult(self):
         """ invalidate working results"""
-        self.cached_result = {}
+        annotations = IAnnotations(self.context)
+        annotations['cached_result'] = {}
         self.setSparql_results("")
         pr = getToolByName(self, 'portal_repository')
         comment = "Invalidated last working result"
@@ -232,7 +245,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        cached_result = getattr(self, 'cached_result', {})
+        annotations = IAnnotations(self.context)
+        cached_result = getattr(annotations, 'cached_result', {})
         cooked_query = interpolate_query(self.query, arg_values)
 
         args = (self.endpoint_url, cooked_query)
@@ -259,20 +273,20 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
         if force_save:
-            self.cached_result = new_result
-            new_sparql_results = u""
-            rows = self.cached_result.get('result', {}).get('rows', {})
+            annotations['cached_result'] = new_result
+            new_sparql_results = []
+            rows = cached_result.get('result', {}).get('rows', {})
             if len(rows) < 201:
                 for row in rows:
                     for val in row:
-                        new_sparql_results = new_sparql_results + \
-                            unicode(val) + " | "
-                    new_sparql_results = new_sparql_results[0:-3] + "\n"
+                        new_sparql_results.append(unicode(val) + " | ")
+                    new_sparql_results[-1] = new_sparql_results[-1][0:-3]
+                    new_sparql_results = "".join(new_sparql_results) + "\n"
                 self.setSparql_results(new_sparql_results)
             else:
-                self.setSparql_results(
-                    "Too many rows (%s), comparation is disabled"
-                    % len(rows))
+               self.setSparql_results(
+                   "Too many rows (%s), comparation is disabled"
+                   % len(rows))
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
@@ -290,18 +304,19 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     msgtype="warn")
 
         if new_result.get('exception', None):
-            self.cached_result['exception'] = new_result['exception']
+            cached_result['exception'] = new_result['exception']
 
     security.declareProtected(view, 'execute')
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        cached_result = getattr(self, 'cached_result', {})
+        annotations = IAnnotations(self.context)
+        cached_result = getattr(annotations, 'cached_result', {})
         if len(arg_values) == 0:
             return cached_result
 
         self.updateLastWorkingResults(**arg_values)
-        return getattr(self, 'cached_result', {})
+        return getattr(annotations, 'cached_result', {})
 
     security.declareProtected(view, 'map_arguments')
     def map_arguments(self, **arg_values):
@@ -321,13 +336,15 @@ def async_updateLastWorkingResults(obj,
                                 bookmarks_folder_added=False):
     """ Async update last working results
     """
+    annotations = IAnnotations(obj)
     if obj.scheduled_at == scheduled_at:
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
 
-        if (len(obj.cached_result.get('result', {}).get('rows', {})) == 0) and \
-            (refresh_rate == 'Once'):
+        if (len(annotations.cached_result.get('result', {}).get('rows',
+                                                                {})) == 0) and \
+                (refresh_rate == 'Once'):
             refresh_rate = 'Hourly'
         else:
             if bookmarks_folder_added:
