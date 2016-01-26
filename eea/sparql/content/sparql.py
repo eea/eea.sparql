@@ -217,7 +217,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     security.declareProtected(view, 'invalidateWorkingResult')
     def invalidateWorkingResult(self):
         """ invalidate working results"""
-        annotations = IAnnotations(self.context)
+        annotations = IAnnotations(self)
         annotations['cached_result'] = {}
         self.setSparql_results("")
         pr = getToolByName(self, 'portal_repository')
@@ -245,8 +245,9 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        annotations = IAnnotations(self.context)
-        cached_result = getattr(annotations, 'cached_result', {})
+        annotations = IAnnotations(self)
+        annotations['cached_result'] = annotations.get('cached_result') or {}
+        cached_result = annotations['cached_result']
         cooked_query = interpolate_query(self.query, arg_values)
 
         args = (self.endpoint_url, cooked_query)
@@ -274,19 +275,20 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         comment = "query has run - no result changes"
         if force_save:
             annotations['cached_result'] = new_result
+            cached_result = annotations['cached_result']
             new_sparql_results = []
-            rows = cached_result.get('result', {}).get('rows', {})
-            if len(rows) < 201:
-                for row in rows:
-                    for val in row:
-                        new_sparql_results.append(unicode(val) + " | ")
-                    new_sparql_results[-1] = new_sparql_results[-1][0:-3]
-                    new_sparql_results = "".join(new_sparql_results) + "\n"
-                self.setSparql_results(new_sparql_results)
-            else:
-               self.setSparql_results(
-                   "Too many rows (%s), comparation is disabled"
-                   % len(rows))
+            rows = new_result.get('result', {}).get('rows', {})
+            # if len(rows) < 201:
+            for row in rows:
+                for val in row:
+                    new_sparql_results.append(unicode(val) + " | ")
+            new_sparql_results[-1] = new_sparql_results[-1][0:-3]
+            new_sparql_results = "".join(new_sparql_results) + "\n"
+            self.setSparql_results(new_sparql_results)
+            # else:
+            #    self.setSparql_results(
+            #        "Too many rows (%s), comparation is disabled"
+            #        % len(rows))
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
@@ -310,13 +312,14 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        annotations = IAnnotations(self.context)
-        cached_result = getattr(annotations, 'cached_result', {})
+        annotations = IAnnotations(self)
+        annotations['cached_result'] = annotations.get('cached_result') or {}
+        cached_result = annotations['cached_result']
         if len(arg_values) == 0:
             return cached_result
 
         self.updateLastWorkingResults(**arg_values)
-        return getattr(annotations, 'cached_result', {})
+        return cached_result
 
     security.declareProtected(view, 'map_arguments')
     def map_arguments(self, **arg_values):
@@ -341,8 +344,8 @@ def async_updateLastWorkingResults(obj,
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
-
-        if (len(annotations.cached_result.get('result', {}).get('rows',
+        annotations['cached_result'] = annotations.get('cached_result') or {}
+        if (len(annotations.get('cached_result').get('result', {}).get('rows',
                                                                 {})) == 0) and \
                 (refresh_rate == 'Once'):
             refresh_rate = 'Hourly'
