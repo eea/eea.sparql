@@ -6,12 +6,13 @@ import datetime, pytz
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
 from AccessControl import getSecurityManager
+
+import cPickle
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
 
 from zope.interface import implements
 from zope.component import getUtility
-from zope.annotation import IAnnotations
 
 from zope.event import notify
 
@@ -40,7 +41,7 @@ from Products.DataGridField.Column import Column
 from Products.DataGridField.LinesColumn import LinesColumn
 
 from AccessControl.Permissions import view
-from eea.sparql.cache import ramcache, cacheSparqlKey
+from eea.sparql.cache import ramcache, cacheSparqlKey, cacheSparqlMethodKey
 from eea.sparql.config import PROJECTNAME
 from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.sparql.events import SparqlBookmarksFolderAdded
@@ -131,7 +132,7 @@ SparqlBaseSchema = atapi.Schema((
     ),
 
     BlobField(
-        name='sparql_blob_results',
+        name='sparql_results_cached',
         widget=TextAreaWidget(
             label="Results",
             visible={'edit':'invisible', 'view':'invisible'}
@@ -217,9 +218,9 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     security.declareProtected(view, 'invalidateWorkingResult')
     def invalidateWorkingResult(self):
         """ invalidate working results"""
-        annotations = IAnnotations(self)
-        annotations['cached_result'] = {}
         self.setSparql_results("")
+        self.setSparql_results_cached("")
+
         pr = getToolByName(self, 'portal_repository')
         comment = "Invalidated last working result"
         comment = comment.encode('utf')
@@ -245,9 +246,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        annotations = IAnnotations(self)
-        annotations['cached_result'] = annotations.get('cached_result') or {}
-        cached_result = annotations['cached_result']
+        # import pdb; pdb.set_trace()
+        cached_result = self.get_cached_results()
         cooked_query = interpolate_query(self.query, arg_values)
 
         args = (self.endpoint_url, cooked_query)
@@ -274,8 +274,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
         if force_save:
-            annotations['cached_result'] = new_result
-            cached_result = annotations['cached_result']
+            self.setSparql_results_cached(cPickle.dumps(new_result))
+            cached_result = new_result
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
             # if len(rows) < 201:
@@ -304,17 +304,26 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     """Changes Saved. Versioning for this file
                        has been disabled because it is too large.""",
                     msgtype="warn")
-
+        # TODO add exception data
         if new_result.get('exception', None):
             cached_result['exception'] = new_result['exception']
+
+
+    # @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
+    def get_cached_results(self):
+        """
+        :return:
+        :rtype:
+        """
+        field = self.getSparql_results_cached()
+        return cPickle.loads(field.data) if field and field.data else {}
 
     security.declareProtected(view, 'execute')
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        annotations = IAnnotations(self)
-        annotations['cached_result'] = annotations.get('cached_result') or {}
-        cached_result = annotations['cached_result']
+        # import pdb; pdb.set_trace()
+        cached_result = self.get_cached_results()
         if len(arg_values) == 0:
             return cached_result
 
@@ -339,13 +348,12 @@ def async_updateLastWorkingResults(obj,
                                 bookmarks_folder_added=False):
     """ Async update last working results
     """
-    annotations = IAnnotations(obj)
     if obj.scheduled_at == scheduled_at:
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
-        annotations['cached_result'] = annotations.get('cached_result') or {}
-        if (len(annotations.get('cached_result').get('result', {}).get('rows',
+        cached_result = obj.get_cached_results()
+        if (len(cached_result.get('result', {}).get('rows',
                                                                 {})) == 0) and \
                 (refresh_rate == 'Once'):
             refresh_rate = 'Hourly'

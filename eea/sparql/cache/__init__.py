@@ -14,7 +14,7 @@ except ImportError:
     from eea.sparql.cache.nocache import ramcache
     from eea.sparql.cache.nocache import flush, flushBackRefs, flushRelatedItems
 
-from eea.sparql.cache.cache import cacheSparqlKey
+from eea.sparql.cache.cache import cacheSparqlKey, cacheSparqlMethodKey
 
 __all__ = [
     ramcache.__name__,
