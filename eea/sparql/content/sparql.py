@@ -267,15 +267,14 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                 if len(new_result.get("result", {}).get("rows", {})) > 0:
                     force_save = True
                 else:
-                    if len(cached_result.get('result', {}).\
-                        get('rows', {})) == 0:
+                    if len(cached_result.get('result', {}).get('rows', {})) \
+                            == 0:
                         force_save = True
 
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
         if force_save:
             self.setSparql_results_cached(cPickle.dumps(new_result))
-            cached_result = new_result
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
             # if len(rows) < 201:
@@ -292,7 +291,6 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
-
             try:
                 oldSecurityManager = getSecurityManager()
                 newSecurityManager(None, SpecialUsers.system)
@@ -304,9 +302,6 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     """Changes Saved. Versioning for this file
                        has been disabled because it is too large.""",
                     msgtype="warn")
-        # TODO add exception data
-        if new_result.get('exception', None):
-            cached_result['exception'] = new_result['exception']
 
 
     # @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
@@ -352,11 +347,10 @@ def async_updateLastWorkingResults(obj,
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
-        cached_result = obj.get_cached_results()
-        if (len(cached_result.get('result', {}).get('rows',
-                                                                {})) == 0) and \
-                (refresh_rate == 'Once'):
-            refresh_rate = 'Hourly'
+        if refresh_rate == 'Once':
+            cached_result = obj.get_cached_results()
+            if len(cached_result.get('result', {}).get('rows', {})) == 0:
+                refresh_rate = 'Hourly'
         else:
             if bookmarks_folder_added:
                 notify(SparqlBookmarksFolderAdded(obj))
@@ -364,13 +358,10 @@ def async_updateLastWorkingResults(obj,
 
         before = datetime.datetime.now(pytz.UTC)
 
-#        delay = before + datetime.timedelta(seconds=10)
         delay = before + datetime.timedelta(hours=1)
         if refresh_rate == "Daily":
             delay = before + datetime.timedelta(days=1)
-#            delay = before + datetime.timedelta(seconds=60)
         if refresh_rate == "Weekly":
-#            delay = before + datetime.timedelta(seconds=120)
             delay = before + datetime.timedelta(weeks=1)
         if refresh_rate != "Once":
             async = getUtility(IAsyncService)
