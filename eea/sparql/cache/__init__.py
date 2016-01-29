@@ -19,6 +19,7 @@ from eea.sparql.cache.cache import cacheSparqlKey, cacheSparqlMethodKey
 __all__ = [
     ramcache.__name__,
     cacheSparqlKey.__name__,
+    cacheSparqlMethodKey.__name__,
     flush.__name__,
     flushBackRefs.__name__,
     flushRelatedItems.__name__,
