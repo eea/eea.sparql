@@ -3,6 +3,7 @@
 
 import DateTime
 import datetime, pytz
+from random import random
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
 from AccessControl import getSecurityManager
@@ -215,11 +216,43 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         except Exception:
             self.timeout = 10
 
+    @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
+    def _getCachedSparqlResults(self):
+        """
+        :return: Cached Sparql results
+        :rtype: object
+        """
+        return cPickle.loads(self.getSparql_results_cached().data)
+
+    def getSparqlCacheResults(self):
+        """
+        :return: Sparql results
+        :rtype: object
+        """
+        if getattr(self, 'sparql_results_are_cached', None):
+            return self._getCachedSparqlResults()
+        field = self.getSparql_results_cached()
+        return cPickle.loads(field.data) if field and field.data else {}
+
+    security.declareProtected(view, 'setSparqlCachedResults')
+    def setSparqlCacheResults(self, result):
+        """ Set Sparql Cache results
+        """
+        self.sparql_results_are_cached = True
+        self.setSparql_results_cached(cPickle.dumps(result))
+
+    security.declareProtected(view, 'invalidateSparqlCacheResult')
+    def invalidateSparqlCacheResults(self):
+        """ Invalidate sparql results
+        """
+        self.sparql_results_are_cached = False
+        self.setSparql_results_cached("")
+
     security.declareProtected(view, 'invalidateWorkingResult')
     def invalidateWorkingResult(self):
         """ invalidate working results"""
         self.setSparql_results("")
-        self.setSparql_results_cached("")
+        self.invalidateSparqlCacheResults()
 
         pr = getToolByName(self, 'portal_repository')
         comment = "Invalidated last working result"
@@ -241,12 +274,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                        scheduled_at=self.scheduled_at,
                        bookmarks_folder_added=False)
 
-
     security.declareProtected(view, 'updateLastWorkingResults')
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        # import pdb; pdb.set_trace()
         cached_result = self.get_cached_results()
         cooked_query = interpolate_query(self.query, arg_values)
 
@@ -274,7 +305,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
         if force_save:
-            self.setSparql_results_cached(cPickle.dumps(new_result))
+            self.setSparqlCacheResults(new_result)
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
             # if len(rows) < 201:
@@ -303,21 +334,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                        has been disabled because it is too large.""",
                     msgtype="warn")
 
-
-    # @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
-    def get_cached_results(self):
-        """
-        :return:
-        :rtype:
-        """
-        field = self.getSparql_results_cached()
-        return cPickle.loads(field.data) if field and field.data else {}
-
     security.declareProtected(view, 'execute')
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        # import pdb; pdb.set_trace()
         cached_result = self.get_cached_results()
         if len(arg_values) == 0:
             return cached_result
@@ -374,7 +394,6 @@ def async_updateLastWorkingResults(obj,
                                     bookmarks_folder_added=\
                                         bookmarks_folder_added)
 
-from random import random
 def generateUniqueId(type_name):
     """ generateUniqueIds for sparqls
     """
