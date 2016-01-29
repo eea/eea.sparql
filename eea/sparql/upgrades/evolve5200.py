@@ -21,7 +21,6 @@ def migrate_sparql_cached_result(context):
     migrated = 0
     for brain in brains:
         log_count += 1
-        logger.info('PATH %s::%s: %s', log_count, log_total, brain.getPath())
         try:
             obj = brain.getObject()
         except Exception:
@@ -30,8 +29,16 @@ def migrate_sparql_cached_result(context):
             continue
 
         if getattr(obj, 'cached_result', None):
+            logger.info('PATH %s::%s: %s', log_count, log_total, brain.getPath())
             obj.setSparqlCacheResults(obj.cached_result)
-            del obj.cached_result
+            obj.cached_result.clear()
+            try:
+                del obj.cached_result
+            except AttributeError:
+                # we can't delete the dict however we are ok with at least
+                # emptying the results from it therefore we allow the
+                # transaction to be made
+                pass
             migrated += 1
             transaction.commit()
             if log_count % 100 == 0:
