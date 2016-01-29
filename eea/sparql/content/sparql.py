@@ -224,6 +224,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         """
         return cPickle.loads(self.getSparql_results_cached().data)
 
+    security.declarePublic("getSparqlCacheResults")
     def getSparqlCacheResults(self):
         """
         :return: Sparql results
@@ -234,14 +235,14 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         field = self.getSparql_results_cached()
         return cPickle.loads(field.data) if field and field.data else {}
 
-    security.declareProtected(view, 'setSparqlCachedResults')
+    security.declareProtected(view, 'setSparqlCacheResults')
     def setSparqlCacheResults(self, result):
         """ Set Sparql Cache results
         """
         self.sparql_results_are_cached = True
         self.setSparql_results_cached(cPickle.dumps(result))
 
-    security.declareProtected(view, 'invalidateSparqlCacheResult')
+    security.declareProtected(view, 'invalidateSparqlCacheResults')
     def invalidateSparqlCacheResults(self):
         """ Invalidate sparql results
         """
@@ -278,7 +279,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        cached_result = self.get_cached_results()
+        cached_result = self.getSparqlCacheResults()
         cooked_query = interpolate_query(self.query, arg_values)
 
         args = (self.endpoint_url, cooked_query)
@@ -338,7 +339,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        cached_result = self.get_cached_results()
+        cached_result = self.getSparqlCacheResults()
         if len(arg_values) == 0:
             return cached_result
 
@@ -368,7 +369,7 @@ def async_updateLastWorkingResults(obj,
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
         if refresh_rate == 'Once':
-            cached_result = obj.get_cached_results()
+            cached_result = obj.getSparqlCacheResults()
             if len(cached_result.get('result', {}).get('rows', {})) == 0:
                 refresh_rate = 'Hourly'
         else:
