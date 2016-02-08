@@ -309,17 +309,12 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             self.setSparqlCacheResults(new_result)
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
-            # if len(rows) < 201:
             for row in rows:
                 for val in row:
                     new_sparql_results.append(unicode(val) + " | ")
             new_sparql_results[-1] = new_sparql_results[-1][0:-3]
             new_sparql_results = "".join(new_sparql_results) + "\n"
             self.setSparql_results(new_sparql_results)
-            # else:
-            #    self.setSparql_results(
-            #        "Too many rows (%s), comparation is disabled"
-            #        % len(rows))
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
@@ -334,6 +329,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     """Changes Saved. Versioning for this file
                        has been disabled because it is too large.""",
                     msgtype="warn")
+
+        if new_result.get('exception', None):
+            cached_result['exception'] = new_result['exception']
+            self.setSparqlCacheResults(cached_result)
 
     security.declareProtected(view, 'execute')
     def execute(self, **arg_values):
