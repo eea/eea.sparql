@@ -110,7 +110,8 @@ SparqlBaseSchema = atapi.Schema((
             helper_css=("sparql_textfield_with_preview.css",),
             label="Query",
         ),
-        required=1
+        required=1,
+        validators=('isSparqlOverLimit',)
     ),
     BooleanField(
         name='sparql_static',
@@ -233,7 +234,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         if getattr(self, 'sparql_results_are_cached', None):
             return self._getCachedSparqlResults()
         field = self.getSparql_results_cached()
-        return cPickle.loads(field.data) if field and field.data else {}
+        empty_result = {"result": {"rows": "", "var_names": "",
+                                   "has_result": ""}}
+        return cPickle.loads(field.data) if field and field.data else \
+            empty_result
+
 
     security.declareProtected(view, 'setSparqlCacheResults')
     def setSparqlCacheResults(self, result):
