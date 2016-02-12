@@ -22,14 +22,14 @@ class SparqlQueryValidator(object):
 
     def run_query(self, request, func, spec):
         """
-        :param request:
-        :type request:
-        :param func:
-        :type func:
-        :param spec:
-        :type spec:
-        :return:
-        :rtype:
+        :param request: Object request
+        :type request: object
+        :param func: query_and_get_result funcion used to query Sparql
+        :type func: function
+        :param spec: Endpoint url and sparql query
+        :type spec: tuple
+        :return: Dict with Sparql results
+        :rtype: dict
         """
         cache = IAnnotations(request)
         key = 'query_result'
@@ -47,12 +47,14 @@ class SparqlQueryValidator(object):
             return 1
 
         arg_spec = (obj.endpoint_url, value)
-
         results = self.run_query(request, query_and_get_result, arg_spec)
         results_len = len(results.get('result', {}).get('rows', {}))
-        if results_len > 9000:
-            msg = "The query result is too large given that there " \
-                  "are %s rows" % results_len
+        pprop = obj.portal_properties
+        site_props = getattr(pprop, 'site_properties', None)
+        max_rows = site_props.getProperty('sparql_max_row_length', 9000)
+        sparql_msg = site_props.getProperty('sparql_max_row_msg', "%s %s")
+        msg = sparql_msg % (results_len, max_rows)
+        if results_len > max_rows:
             IStatusMessage(request).addStatusMessage(str(msg),
                                                      type='warning')
             return 1
