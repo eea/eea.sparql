@@ -9,7 +9,7 @@ logger = logging.getLogger("eea.sparql.upgrades")
 
 
 def migrate_sparql_cached_result(context):
-    """ Migrate sparqls cached_result to a blob field
+    """ Migrate Sparql's cached_result to a blob field
     """
 
     catalog = getToolByName(context, 'portal_catalog')
@@ -48,3 +48,16 @@ def migrate_sparql_cached_result(context):
     message = 'Migrated cached_result for %s Sparqls ...' % migrated
     logger.info(message)
     return message
+
+
+def add_sparql_max_row_length_properties(context):
+    """ Add site properties sparql max rows length and msg
+    """
+    pprop = getToolByName(context, 'portal_properties')
+    site_properties = pprop.site_properties
+    if not site_properties.hasProperty('sparql_max_row_length'):
+        site_properties._setProperty('sparql_max_row_length', 9000, 'int')
+    if not site_properties.hasProperty('sparql_max_row_msg'):
+        msg = "The SPARQL query returns a large results of %s rows." \
+             " We recommend to limit the query in order to be below %s"
+        site_properties._setProperty('sparql_max_row_msg', msg, 'text')
