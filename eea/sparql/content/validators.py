@@ -9,7 +9,6 @@ from Products.ZSPARQLMethod.Method import run_with_timeout
 from Products.ZSPARQLMethod.Method import query_and_get_result
 
 
-
 class SparqlQueryValidator(object):
     """ Validator
     """
@@ -35,7 +34,7 @@ class SparqlQueryValidator(object):
         cache = IAnnotations(request)
         key = 'query_result'
         data = cache.get('query_result', None)
-        if data is not None:
+        if data is None:
             data = run_with_timeout(15, func, *spec)
             cache[key] = data
         return data
