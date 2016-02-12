@@ -36,6 +36,9 @@ $(document).ready(function() {
 
 });
 
-Browser.onUploadComplete = function() {
-    // don't reload the page after uploading file
-};
+if (window.Browser) {
+    window.Browser.onUploadComplete = function(){
+        // don't reload the page after uploading file
+    };
+}
+

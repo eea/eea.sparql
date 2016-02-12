@@ -7,7 +7,8 @@ from zope.interface import implements
 
 from Products.ZSPARQLMethod.Method import run_with_timeout
 from Products.ZSPARQLMethod.Method import query_and_get_result
-import sparql
+
+sparql = __import__('sparql')
 
 
 class SparqlQueryValidator(object):
@@ -32,20 +33,26 @@ class SparqlQueryValidator(object):
         :return: Dict with Sparql results
         :rtype: dict
         """
-        split_query = query.split("SELECT")
-        endpoint = split_query[0]
-        count_query = endpoint + "SELECT (COUNT (*) as ?row_count) " \
-                                 "WHERE{{ SELECT" + split_query[1:] + "}}"
+        endpoint = query[0]
+        sparql_query = query[1]
+        split_query = sparql_query.split("SELECT")
+        # attempt to wrap original select within a count in order to get
+        # row length without having to save them since we are only concerned
+        # with results count and not the results themselves
+        count_query = split_query[0] + "SELECT (COUNT (*) as ?row_count) " \
+                                 "WHERE{{ SELECT" + "".join(split_query[1:]) \
+                      + "}}"
         result_len = 0
         try:
-            result = sparql.query((endpoint, count_query), timeout=timeout)
+            result = sparql.query(endpoint, count_query, timeout=timeout)
             fetched_results = result.fetchall()
             for entry in fetched_results:
                 first_result = entry[0]
                 result_len = int(first_result.value)
-        except Exception:
+                break
+        except Exception, e:
             result = run_with_timeout(timeout, func, *query)
-            result_len = len(result['results']['rows'])
+            result_len = len(result.get('result', {}).get('rows', {}))
         return result_len
 
 
@@ -77,8 +84,7 @@ class SparqlQueryValidator(object):
             return 1
 
         arg_spec = (obj.endpoint_url, value)
-        results = self.run_query(request, query_and_get_result, arg_spec)
-        results_len = len(results.get('result', {}).get('rows', {}))
+        results_len = self.run_query(request, query_and_get_result, arg_spec)
         pprop = obj.portal_properties
         site_props = getattr(pprop, 'site_properties', None)
         max_rows = site_props.getProperty('sparql_max_row_length', 9000)
