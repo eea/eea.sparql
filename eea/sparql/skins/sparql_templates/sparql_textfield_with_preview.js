@@ -75,7 +75,7 @@ function check_relations() {
             var back_rels = JSON.parse(data);
             if (back_rels.length !== 0) {
                 var warningMessage = jQuery(
-                    '<dl class="portalMessage">' +
+                    '<dl class="portalMessage warning">' +
                         '<dt>Warning</dt>' +
                         '<div style="clear:both"></div' +
                         '<dd>' +
@@ -95,7 +95,6 @@ function check_relations() {
         }
     });
 
-//    jQuery("<div>XXX</div>").after(".documentFirstHeading");
 }
 jQuery(document).ready(function($) {
     jQuery(".sparql-query-results-preview").click(preview_sparql);

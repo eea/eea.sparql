@@ -3,9 +3,12 @@
 
 import DateTime
 import datetime, pytz
+from random import random
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
 from AccessControl import getSecurityManager
+
+import cPickle
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
 
@@ -39,13 +42,15 @@ from Products.DataGridField.Column import Column
 from Products.DataGridField.LinesColumn import LinesColumn
 
 from AccessControl.Permissions import view
-from eea.sparql.cache import ramcache, cacheSparqlKey
+from eea.sparql.cache import ramcache, cacheSparqlKey, cacheSparqlMethodKey
 from eea.sparql.config import PROJECTNAME
 from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.sparql.events import SparqlBookmarksFolderAdded
 
 from eea.versions.interfaces import IVersionEnhanced, IGetVersions
 from eea.versions import versions
+
+from plone.app.blob.field import BlobField
 
 
 SparqlBaseSchema = atapi.Schema((
@@ -105,7 +110,8 @@ SparqlBaseSchema = atapi.Schema((
             helper_css=("sparql_textfield_with_preview.css",),
             label="Query",
         ),
-        required=1
+        required=1,
+        validators=('isSparqlOverLimit',)
     ),
     BooleanField(
         name='sparql_static',
@@ -125,6 +131,15 @@ SparqlBaseSchema = atapi.Schema((
         ),
         required=0,
 
+    ),
+
+    BlobField(
+        name='sparql_results_cached',
+        widget=TextAreaWidget(
+            label="Results",
+            visible={'edit':'invisible', 'view':'invisible'}
+        ),
+        required=0,
     ),
     StringField(
         name='refresh_rate',
@@ -202,11 +217,49 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         except Exception:
             self.timeout = 10
 
+    @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
+    def _getCachedSparqlResults(self):
+        """
+        :return: Cached Sparql results
+        :rtype: object
+        """
+        return cPickle.loads(self.getSparql_results_cached().data)
+
+    security.declarePublic("getSparqlCacheResults")
+    def getSparqlCacheResults(self):
+        """
+        :return: Sparql results
+        :rtype: object
+        """
+        if getattr(self, 'sparql_results_are_cached', None):
+            return self._getCachedSparqlResults()
+        field = self.getSparql_results_cached()
+        empty_result = {"result": {"rows": "", "var_names": "",
+                                   "has_result": ""}}
+        return cPickle.loads(field.data) if field and field.data else \
+            empty_result
+
+
+    security.declareProtected(view, 'setSparqlCacheResults')
+    def setSparqlCacheResults(self, result):
+        """ Set Sparql Cache results
+        """
+        self.sparql_results_are_cached = True
+        self.setSparql_results_cached(cPickle.dumps(result))
+
+    security.declareProtected(view, 'invalidateSparqlCacheResults')
+    def invalidateSparqlCacheResults(self):
+        """ Invalidate sparql results
+        """
+        self.sparql_results_are_cached = False
+        self.setSparql_results_cached("")
+
     security.declareProtected(view, 'invalidateWorkingResult')
     def invalidateWorkingResult(self):
         """ invalidate working results"""
-        self.cached_result = {}
         self.setSparql_results("")
+        self.invalidateSparqlCacheResults()
+
         pr = getToolByName(self, 'portal_repository')
         comment = "Invalidated last working result"
         comment = comment.encode('utf')
@@ -227,12 +280,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                        scheduled_at=self.scheduled_at,
                        bookmarks_folder_added=False)
 
-
     security.declareProtected(view, 'updateLastWorkingResults')
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query
         """
-        cached_result = getattr(self, 'cached_result', {})
+        cached_result = self.getSparqlCacheResults()
         cooked_query = interpolate_query(self.query, arg_values)
 
         args = (self.endpoint_url, cooked_query)
@@ -252,31 +304,25 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                 if len(new_result.get("result", {}).get("rows", {})) > 0:
                     force_save = True
                 else:
-                    if len(cached_result.get('result', {}).\
-                        get('rows', {})) == 0:
+                    if len(cached_result.get('result', {}).get('rows', {})) \
+                            == 0:
                         force_save = True
 
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
         if force_save:
-            self.cached_result = new_result
-            new_sparql_results = u""
-            rows = self.cached_result.get('result', {}).get('rows', {})
-            if len(rows) < 201:
-                for row in rows:
-                    for val in row:
-                        new_sparql_results = new_sparql_results + \
-                            unicode(val) + " | "
-                    new_sparql_results = new_sparql_results[0:-3] + "\n"
-                self.setSparql_results(new_sparql_results)
-            else:
-                self.setSparql_results(
-                    "Too many rows (%s), comparation is disabled"
-                    % len(rows))
+            self.setSparqlCacheResults(new_result)
+            new_sparql_results = []
+            rows = new_result.get('result', {}).get('rows', {})
+            for row in rows:
+                for val in row:
+                    new_sparql_results.append(unicode(val) + " | ")
+            new_sparql_results[-1] = new_sparql_results[-1][0:-3]
+            new_sparql_results = "".join(new_sparql_results) + "\n"
+            self.setSparql_results(new_sparql_results)
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
-
             try:
                 oldSecurityManager = getSecurityManager()
                 newSecurityManager(None, SpecialUsers.system)
@@ -290,18 +336,19 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     msgtype="warn")
 
         if new_result.get('exception', None):
-            self.cached_result['exception'] = new_result['exception']
+            cached_result['exception'] = new_result['exception']
+            self.setSparqlCacheResults(cached_result)
 
     security.declareProtected(view, 'execute')
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
-        cached_result = getattr(self, 'cached_result', {})
+        cached_result = self.getSparqlCacheResults()
         if len(arg_values) == 0:
             return cached_result
 
         self.updateLastWorkingResults(**arg_values)
-        return getattr(self, 'cached_result', {})
+        return cached_result
 
     security.declareProtected(view, 'map_arguments')
     def map_arguments(self, **arg_values):
@@ -325,10 +372,10 @@ def async_updateLastWorkingResults(obj,
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
-
-        if (len(obj.cached_result.get('result', {}).get('rows', {})) == 0) and \
-            (refresh_rate == 'Once'):
-            refresh_rate = 'Hourly'
+        if refresh_rate == 'Once':
+            cached_result = obj.getSparqlCacheResults()
+            if len(cached_result.get('result', {}).get('rows', {})) == 0:
+                refresh_rate = 'Hourly'
         else:
             if bookmarks_folder_added:
                 notify(SparqlBookmarksFolderAdded(obj))
@@ -336,13 +383,10 @@ def async_updateLastWorkingResults(obj,
 
         before = datetime.datetime.now(pytz.UTC)
 
-#        delay = before + datetime.timedelta(seconds=10)
         delay = before + datetime.timedelta(hours=1)
         if refresh_rate == "Daily":
             delay = before + datetime.timedelta(days=1)
-#            delay = before + datetime.timedelta(seconds=60)
         if refresh_rate == "Weekly":
-#            delay = before + datetime.timedelta(seconds=120)
             delay = before + datetime.timedelta(weeks=1)
         if refresh_rate != "Once":
             async = getUtility(IAsyncService)
@@ -355,7 +399,6 @@ def async_updateLastWorkingResults(obj,
                                     bookmarks_folder_added=\
                                         bookmarks_folder_added)
 
-from random import random
 def generateUniqueId(type_name):
     """ generateUniqueIds for sparqls
     """

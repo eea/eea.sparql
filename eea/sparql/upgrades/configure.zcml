@@ -2,6 +2,24 @@
   xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
   i18n_domain="eea">
 
+  <!-- 4.5 => 5.2 -->
+  <genericsetup:upgradeSteps
+    source="4500"
+    destination="5200"
+    profile="eea.sparql:default">
+
+    <genericsetup:upgradeStep
+      title="Migrate cached_result to sparql_results_cached blob field"
+      handler="eea.sparql.upgrades.evolve5200.migrate_sparql_cached_result"
+    />
+
+      <genericsetup:upgradeStep
+          title="Add Sparql warning message for too many rows results"
+          handler="eea.sparql.upgrades.evolve5200.add_sparql_max_row_length_properties"
+      />
+
+  </genericsetup:upgradeSteps>
+
   <!-- 4.4 => 4.5 -->
   <genericsetup:upgradeSteps
     source="4400"

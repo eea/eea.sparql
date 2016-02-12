@@ -3,6 +3,12 @@ Changelog
 
 5.2.dev0 - (unreleased)
 -----------------------
+* Feature: moved cached_result sparql cache to a blob field in order to
+  decrease object size, especially useful in versioning and history diff
+  [ichimdav refs #17334]
+* Upgrade step: Within "Plone > Site setup > Add-ons" click on
+  upgrade button available for eea.sparql with www8 service instance
+  [ichimdav refs #17334]
 
 5.1 - (2016-01-19)
 ------------------
