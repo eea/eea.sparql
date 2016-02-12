@@ -7,6 +7,7 @@ from zope.interface import implements
 
 from Products.ZSPARQLMethod.Method import run_with_timeout
 from Products.ZSPARQLMethod.Method import query_and_get_result
+import sparql
 
 
 class SparqlQueryValidator(object):
@@ -20,14 +21,43 @@ class SparqlQueryValidator(object):
         self.title = title or name
         self.description = description
 
-    def run_query(self, request, func, spec):
+    def count_sparql_results(self, timeout, func, *query):
+        """
+        :param timeout: Sparql query timeout
+        :type timeout: int
+        :param func: query_and_get_result function used to query Sparql
+        :type func: function
+        :param query: Endpoint url and sparql query
+        :type query: tuple
+        :return: Dict with Sparql results
+        :rtype: dict
+        """
+        split_query = query.split("SELECT")
+        endpoint = split_query[0]
+        count_query = endpoint + "SELECT (COUNT (*) as ?row_count) " \
+                                 "WHERE{{ SELECT" + split_query[1:] + "}}"
+        result_len = 0
+        try:
+            result = sparql.query((endpoint, count_query), timeout=timeout)
+            fetched_results = result.fetchall()
+            for entry in fetched_results:
+                first_result = entry[0]
+                result_len = int(first_result.value)
+        except Exception:
+            result = run_with_timeout(timeout, func, *query)
+            result_len = len(result['results']['rows'])
+        return result_len
+
+
+
+    def run_query(self, request, func, query):
         """
         :param request: Object request
         :type request: object
-        :param func: query_and_get_result funcion used to query Sparql
+        :param func: query_and_get_result function used to query Sparql
         :type func: function
-        :param spec: Endpoint url and sparql query
-        :type spec: tuple
+        :param query: Endpoint url and sparql query
+        :type query: tuple
         :return: Dict with Sparql results
         :rtype: dict
         """
@@ -35,7 +65,7 @@ class SparqlQueryValidator(object):
         key = 'query_result'
         data = cache.get('query_result', None)
         if data is None:
-            data = run_with_timeout(15, func, *spec)
+            data = self.count_sparql_results(15, func, *query)
             cache[key] = data
         return data
 
@@ -55,8 +85,7 @@ class SparqlQueryValidator(object):
         sparql_msg = site_props.getProperty('sparql_max_row_msg', "%s %s")
         msg = sparql_msg % (results_len, max_rows)
         if results_len > max_rows:
-            IStatusMessage(request).addStatusMessage(str(msg),
-                                                     type='warning')
+            IStatusMessage(request).addStatusMessage(msg, type='warning')
             return 1
         return 1
 
