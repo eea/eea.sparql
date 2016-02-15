@@ -21,7 +21,7 @@ def migrate_sparqls(context):
         field = obj.getField('arg_spec')
         argspec = field.getAccessor(obj)()
 
-        if argspec and type(argspec) is not tuple:
+        if argspec and not isinstance(argspec, tuple):
             nbr_updated += 1
             args = argspec.split()
             new_args = ()
