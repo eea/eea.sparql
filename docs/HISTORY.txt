@@ -1,8 +1,8 @@
 Changelog
 =========
 
-5.2.dev0 - (unreleased)
------------------------
+5.2 - (2016-02-15)
+------------------
 * Feature: moved cached_result sparql cache to a blob field in order to
   decrease object size, especially useful in versioning and history diff
   [ichimdav refs #17334]
