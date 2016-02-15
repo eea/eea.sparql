@@ -50,7 +50,7 @@ class SparqlQueryValidator(object):
                 first_result = entry[0]
                 result_len = int(first_result.value)
                 break
-        except Exception, e:
+        except Exception:
             result = run_with_timeout(timeout, func, *query)
             result_len = len(result.get('result', {}).get('rows', {}))
         return result_len

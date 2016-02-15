@@ -24,12 +24,12 @@ def migrate_sparql_cached_result(context):
         try:
             obj = brain.getObject()
         except Exception:
-            logger.info('FAILED getObject %s::%s: %s', log_count, log_total,
+            logger.info('FAILED getObject %s:%s: %s', log_count, log_total,
                         brain.getPath())
             continue
 
         if getattr(obj, 'cached_result', None):
-            logger.info('PATH %s::%s: %s', log_count, log_total, brain.getPath())
+            logger.info('PATH %s:%s: %s', log_count, log_total, brain.getPath())
             obj.setSparqlCacheResults(obj.cached_result)
             obj.cached_result.clear()
             try:
