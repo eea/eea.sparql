@@ -314,10 +314,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             self.setSparqlCacheResults(new_result)
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
-            for row in rows:
-                for val in row:
-                    new_sparql_results.append(unicode(val) + " | ")
-            new_sparql_results[-1] = new_sparql_results[-1][0:-3]
+            if rows:
+                for row in rows:
+                    for val in row:
+                        new_sparql_results.append(unicode(val) + " | ")
+                new_sparql_results[-1] = new_sparql_results[-1][0:-3]
             new_sparql_results = "".join(new_sparql_results) + "\n"
             self.setSparql_results(new_sparql_results)
             comment = "query has run - result changed"
