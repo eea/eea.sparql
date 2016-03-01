@@ -1,6 +1,9 @@
 Changelog
 =========
 
+5.4.dev0 - (unreleased)
+-----------------------
+
 5.3 - (2016-03-01)
 ------------------
 * Bug fix: take into consideration that sparql_results might miss the blob file
