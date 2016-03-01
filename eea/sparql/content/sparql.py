@@ -11,6 +11,7 @@ from AccessControl import getSecurityManager
 import cPickle
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
+from ZODB.POSException import POSKeyError
 
 from zope.interface import implements
 from zope.component import getUtility
@@ -223,7 +224,18 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         :return: Cached Sparql results
         :rtype: object
         """
-        return cPickle.loads(self.getSparql_results_cached().data)
+        empty_result = {"result": {"rows": "", "var_names": "",
+                                   "has_result": ""}}
+        try:
+            data = self.getSparql_results_cached().data
+        # 69841 take into account missing blobs
+        except POSKeyError:
+            return empty_result
+        # 69841 make sure the data returned can be pickled
+        try:
+            return cPickle.loads(data)
+        except cPickle.UnpicklingError:
+            return empty_result
 
     security.declarePublic("getSparqlCacheResults")
     def getSparqlCacheResults(self):

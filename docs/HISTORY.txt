@@ -3,6 +3,8 @@ Changelog
 
 5.3.dev0 - (unreleased)
 -----------------------
+* Bug fix: take into consideration that sparql_results might miss the blob file
+  [ichimdav refs #69841]
 * Bug fix: avoid 'index out of range' error when updating sparql results
   [danielm-gh refs #69841]
 
