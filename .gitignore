@@ -5,4 +5,5 @@
 dist
 searchindex.js
 search.html
-.DS_Store
+pylint.log
+pyflakes.log
