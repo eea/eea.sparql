@@ -3,6 +3,10 @@ Changelog
 
 5.4.dev0 - (unreleased)
 -----------------------
+* Change: changed control panel entry name
+  [alecghica refs #70987]
+* Upgrade step: re-import control panel profile
+  [alecghica refs #70987]
 
 5.3 - (2016-03-01)
 ------------------
