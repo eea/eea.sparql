@@ -1,6 +1,9 @@
 Changelog
 =========
 
+5.5.dev0 - (unreleased)
+-----------------------
+
 5.4 - (2016-05-04)
 ------------------
 * Change: changed control panel entry name
