@@ -1,19 +1,30 @@
 """ Base module for sparql tests
 """
 
-from Products.Five import zcml
-from Products.Five import fiveconfigure
-
-from Testing import ZopeTestCase as ztc
-
-from Products.PloneTestCase import PloneTestCase as ptc
-from Products.PloneTestCase.layer import onsetup
-
-import eea.sparql
-
 import BaseHTTPServer
 import threading
+
+import eea.sparql
+from Products.Five import fiveconfigure
+from Products.Five import zcml
+from Products.PloneTestCase import PloneTestCase as ptc
+from Products.PloneTestCase.layer import onsetup
+from Testing import ZopeTestCase as ztc
+#
+# Layered testing
+#
+from plone.testing import z2
+from plone.app.testing import TEST_USER_ID
+from plone.app.testing import setRoles
+from plone.app.testing import PloneSandboxLayer
+from plone.app.testing import applyProfile
+from plone.app.testing import PLONE_FIXTURE
+from plone.app.testing import FunctionalTesting
+
+#port for mock http server
+from eea.sparql.tests.mock_server import PORT
 from eea.sparql.tests.mock_server import Handler
+
 
 @onsetup
 def setup_sparql():
@@ -29,8 +40,6 @@ def setup_sparql():
 setup_sparql()
 ptc.setupPloneSite(products=['eea.sparql'])
 
-#port for mock http server
-from eea.sparql.tests.mock_server import PORT
 
 class SparqlFunctionalTestCase(ptc.FunctionalTestCase):
     """ Base class for functional integration tests for the Sparql product.
@@ -54,16 +63,6 @@ class SparqlFunctionalTestCase(ptc.FunctionalTestCase):
         self.portal.portal_membership.addMember('contributor',
                                                 'secret',
                                                 roles, [])
-#
-# Layered testing
-#
-from plone.testing import z2
-from plone.app.testing import TEST_USER_ID
-from plone.app.testing import setRoles
-from plone.app.testing import PloneSandboxLayer
-from plone.app.testing import applyProfile
-from plone.app.testing import PLONE_FIXTURE
-from plone.app.testing import FunctionalTesting
 
 class EEAFixture(PloneSandboxLayer):
     """ EEA Testing Policy

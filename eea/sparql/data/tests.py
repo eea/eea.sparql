@@ -1,17 +1,20 @@
 """ Doc tests
 """
-import logging
 import doctest
+import logging
 import unittest
+
 from eea.sparql.tests.base import FUNCTIONAL_TESTING
 from plone.testing import layered
-logger = logging.getLogger('eea.sparql')
 
-VISUALIZATION = None
 try:
     from eea.app.visualization import interfaces as VISUALIZATION
 except ImportError, err:
+    VISUALIZATION = None
+    logger = logging.getLogger('eea.sparql')
     logger.debug(err)
+
+logger = logging.getLogger('eea.sparql')
 
 OPTIONFLAGS = (doctest.REPORT_ONLY_FIRST_FAILURE |
                doctest.ELLIPSIS |

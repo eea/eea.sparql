@@ -1,13 +1,15 @@
 """ Migrate sparqls for async update of last working results
 """
 
+import datetime
 import logging
+import pytz
+
 import DateTime
-import datetime, pytz
-from zope.component import getUtility
-from plone.app.async.interfaces import IAsyncService
 from Products.CMFCore.utils import getToolByName
 from eea.sparql.content.sparql import async_updateLastWorkingResults
+from plone.app.async.interfaces import IAsyncService
+from zope.component import getUtility
 
 logger = logging.getLogger("eea.sparql.upgrades")
 

@@ -1,15 +1,18 @@
 """ Control panel
 """
-from Products.Five import BrowserView
-from zope.component import getUtility
-from plone.app.async.interfaces import IAsyncService
-from Products.CMFCore.utils import getToolByName
-import DateTime
-from eea.sparql.content.sparql import async_updateLastWorkingResults
-import logging
 import inspect
-from Products.CMFCore.permissions import ManagePortal
+import logging
+import DateTime
+
 from AccessControl import getSecurityManager, Unauthorized
+
+from Products.CMFCore.permissions import ManagePortal
+from Products.CMFCore.utils import getToolByName
+from Products.Five import BrowserView
+from eea.sparql.content.sparql import async_updateLastWorkingResults
+from plone.app.async.interfaces import IAsyncService
+from zope.component import getUtility
+
 
 class ScheduleStatus(BrowserView):
     """ Async Schedule Status of Sparql Queries

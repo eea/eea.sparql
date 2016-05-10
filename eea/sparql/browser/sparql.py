@@ -1,34 +1,37 @@
 """ sparql
 """
-import re
-import logging
+import cgi
+import contextlib
 import csv
+import json
+import logging
+import urllib
+import urllib2
+from time import time
+
+import re
+
+from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
+from Products.ZSPARQLMethod.Method import interpolate_query
 from Products.ZSPARQLMethod.Method import interpolate_query_html
 from Products.ZSPARQLMethod.Method import map_arg_values
 from Products.ZSPARQLMethod.Method import parse_arg_spec
-from Products.ZSPARQLMethod.Method import interpolate_query
-from Products.ZSPARQLMethod.Method import run_with_timeout
 from Products.ZSPARQLMethod.Method import query_and_get_result
-
-from eea.sparql.converter.sparql2json import sparql2json
+from Products.ZSPARQLMethod.Method import run_with_timeout
 from eea.sparql.converter.sparql2json import sortProperties
+from eea.sparql.converter.sparql2json import sparql2json
 from eea.versions.interfaces import IGetVersions
-from Products.CMFCore.utils import getToolByName
-from time import time
-import json
-import urllib
-import urllib2
-import contextlib
-import cgi
 
 logger = logging.getLogger('eea.sparql')
+
 
 class ExcelTSV(csv.excel):
     """ CSV Tab Separated Dialect
     """
     delimiter = '\t'
 csv.register_dialect("excel.tsv", ExcelTSV)
+
 
 class Sparql(BrowserView):
     """Sparql view"""
@@ -372,6 +375,7 @@ class SparqlBookmarksFolder(Sparql):
             self.request.response.redirect(ob.absolute_url() +
                 "/daviz-create-new.html")
 
+
 class SparqlBookmarkFoldersSync(BrowserView):
     """ Sync all Bookmark Folders """
 
@@ -384,6 +388,7 @@ class SparqlBookmarkFoldersSync(BrowserView):
             except Exception, err:
                 logger.exception(err)
         return "Sync done"
+
 
 class QuickPreview(BrowserView):
     """ Quick Preview For Query
@@ -406,7 +411,7 @@ class QuickPreview(BrowserView):
             for missing_arg in missing:
                 error = error + "<div>Argument '%s' missing</div>" % missing_arg
         else:
-            result = {}
+            result = []
             data = []
             error = None
             try:
@@ -430,10 +435,7 @@ class QuickPreview(BrowserView):
         if error:
             return "<code class='sparql-error'><pre> %s </pre></code>" % error
 
-        result = []
-        result.append(u"<table class='sparql-results'>")
-        result.append(u"<thead>")
-        result.append(u"<tr>")
+        result = [u"<table class='sparql-results'>", u"<thead>", u"<tr>"]
         for var_name in data.get('var_names', []):
             result.append(u"<th> %s </th>" %var_name)
         result.append(u"</tr>")

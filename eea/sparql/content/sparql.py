@@ -1,58 +1,51 @@
 """Definition of the Sparql content type
 """
 
-import DateTime
-import datetime, pytz
-from random import random
+import cPickle
+import datetime
+import pytz
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
 from AccessControl import getSecurityManager
-
-import cPickle
-from AccessControl.SecurityManagement import newSecurityManager
-from AccessControl.SecurityManagement import setSecurityManager
-from ZODB.POSException import POSKeyError
+from random import random
 
 from zope.interface import implements
-from zope.component import getUtility
 
-from zope.event import notify
-
-from plone.app.async.interfaces import IAsyncService
-
+import DateTime
+from AccessControl.Permissions import view
+from AccessControl.SecurityManagement import newSecurityManager
+from AccessControl.SecurityManagement import setSecurityManager
 from Products.ATContentTypes.content import schemata, base
 from Products.ATContentTypes.content.folder import ATFolder
-
 from Products.Archetypes import atapi
 from Products.Archetypes.atapi import IntegerField
-from Products.Archetypes.atapi import SelectionWidget
 from Products.Archetypes.atapi import Schema
+from Products.Archetypes.atapi import SelectionWidget
 from Products.Archetypes.atapi import StringField, StringWidget, \
                                         BooleanWidget, BooleanField
 from Products.Archetypes.atapi import TextField, TextAreaWidget
+from Products.CMFCore.utils import getToolByName
+from Products.CMFEditions.interfaces.IModifier import FileTooLargeToVersionError
+from Products.DataGridField import DataGridField, DataGridWidget
+from Products.DataGridField.Column import Column
+from Products.DataGridField.LinesColumn import LinesColumn
 from Products.ZSPARQLMethod.Method import ZSPARQLMethod, \
                                         interpolate_query, \
                                         run_with_timeout, \
                                         parse_arg_spec, \
                                         query_and_get_result, \
                                         map_arg_values, QueryTimeout
-from Products.CMFCore.utils import getToolByName
-from Products.CMFEditions.interfaces.IModifier import FileTooLargeToVersionError
-from Products.DataGridField import DataGridField, DataGridWidget
-from Products.DataGridField.Column import Column
-from Products.DataGridField.LinesColumn import LinesColumn
-
-from AccessControl.Permissions import view
+from ZODB.POSException import POSKeyError
 from eea.sparql.cache import ramcache, cacheSparqlKey, cacheSparqlMethodKey
 from eea.sparql.config import PROJECTNAME
-from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.sparql.events import SparqlBookmarksFolderAdded
-
-from eea.versions.interfaces import IVersionEnhanced, IGetVersions
+from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.versions import versions
-
+from eea.versions.interfaces import IVersionEnhanced, IGetVersions
+from plone.app.async.interfaces import IAsyncService
 from plone.app.blob.field import BlobField
-
+from zope.component import getUtility
+from zope.event import notify
 
 SparqlBaseSchema = atapi.Schema((
     StringField(
@@ -331,8 +324,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                     for val in row:
                         new_sparql_results.append(unicode(val) + " | ")
                 new_sparql_results[-1] = new_sparql_results[-1][0:-3]
-            new_sparql_results = "".join(new_sparql_results) + "\n"
-            self.setSparql_results(new_sparql_results)
+            new_sparql_results_str = "".join(new_sparql_results) + "\n"
+            self.setSparql_results(new_sparql_results_str)
             comment = "query has run - result changed"
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
