@@ -10,7 +10,7 @@
             <h1 class="documentFirstHeading">Sparql Async Queue Status</h1>
             <p class="discreet">Details about sparql queries with a repeatable refresh rate, which are not scheduled in the async queue.</p>
 
-            <p tal:condition="view/getUnqSparqlStatus">
+            <div tal:condition="view/getUnqSparqlStatus">
                 <div class="portalMessage warningMessage">
                      <span tal:define="results view/getUnqSparqlStatus" tal:content="python:len(results)"></span> sparql queries are not scheduled in the async queue.
                 </div>
@@ -26,7 +26,7 @@
                     <input type="hidden" name="start_all_spq" value="T"/>
                     <input type="submit" value="Schedule all now"/>
                 </form>
-            </p>
+            </div>
 
             <div tal:condition="not:view/getUnqSparqlStatus" class="portalMessage thumbsUpMessage">
                 There are no unqueued sparql queries.

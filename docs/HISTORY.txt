@@ -3,6 +3,8 @@ Changelog
 
 5.6.dev0 - (unreleased)
 -----------------------
+* Bug fix: fix broken control panel page template
+  [tiberich]
 
 5.5 - (2016-05-19)
 ------------------
@@ -62,7 +64,7 @@ Changelog
 
 4.7 - (2015-11-16)
 ------------------
-* Bug fix: Fixed upgrade step 4400 for eea.sparql to start all async jobs for 
+* Bug fix: Fixed upgrade step 4400 for eea.sparql to start all async jobs for
   sparal methods
   [szabozo0 refs #30673]
 
