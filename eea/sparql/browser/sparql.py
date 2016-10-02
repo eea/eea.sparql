@@ -12,6 +12,7 @@ from time import time
 import re
 
 from Products.CMFCore.utils import getToolByName
+from plone.app.layout.viewlets.content import ContentHistoryView 
 from Products.Five import BrowserView
 from Products.ZSPARQLMethod.Method import interpolate_query
 from Products.ZSPARQLMethod.Method import interpolate_query_html
@@ -80,6 +81,19 @@ class Sparql(BrowserView):
             if 'result' in data:
                 return data['result']['rows']
         return results
+
+    def getLastQueryRunTime(self):
+        """ Parses the history and returns the last entry when
+            the query has run.
+        """
+        try:
+            history = ContentHistoryView(self.context, self.request).fullHistory()
+        except Exception, err:
+            history = []
+        r = None
+        if history:
+            r = history[0]
+        return r
 
     def test_query(self):
         """test query"""

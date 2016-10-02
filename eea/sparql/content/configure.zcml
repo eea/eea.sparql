@@ -44,5 +44,10 @@
     handler=".events.sparql_added_or_modified"
     />
 
+  <subscriber
+    for="eea.sparql.interfaces.ISparql
+         Products.Archetypes.interfaces.IObjectEditedEvent"
+    handler=".events.sparql_modified"
+    />
 
 </configure>

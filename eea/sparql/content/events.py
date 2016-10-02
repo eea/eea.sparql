@@ -5,8 +5,8 @@ from zope.component import getUtility
 from plone.app.async.interfaces import IAsyncService
 from Products.Archetypes.interfaces import IObjectInitializedEvent
 from eea.sparql.content.sparql import async_updateLastWorkingResults
-from eea.sparql.interfaces import ISparqlBookmarksFolder
-
+from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
+from Products.statusmessages.interfaces import IStatusMessage
 
 def bookmarksfolder_added(obj, evt):
     """On new bookmark folder automatically fetch all queries"""
@@ -28,3 +28,14 @@ def sparql_added_or_modified(obj, evt):
                     scheduled_at=obj.scheduled_at,
                     bookmarks_folder_added=bookmarks_folder_added)
 
+def sparql_modified(obj, evt):
+    """ Flush cache when the object is modified and show a portal message
+    """
+    #obj.invalidateSparqlCacheResults()
+
+    anchor_url = '%s/@@view#sparql-stats' % obj.absolute_url()
+
+    IStatusMessage(obj.REQUEST).addStatusMessage(
+        'The data will be updated shortly, please check \
+        <a href="%s">the info</a> below.' % anchor_url,
+        type='info')

@@ -44,11 +44,18 @@
     </div>
 
     <p class="sparql-stats" tal:condition="options/data">
+      <a name="sparql-stats"></a>
       Received
       <span class="number" tal:content="python:len(options['data']['rows'])"/>
       rows<tal:block condition="python:'duration' in options"> in
       <span class="number" tal:content="python:'%.3f' % options['duration']"/>
       seconds</tal:block>.
+      <tal:block tal:define="last_query_runtime view/getLastQueryRunTime" tal:condition="last_query_runtime">
+        <br />
+        <span tal:replace="python:last_query_runtime['comments'].capitalize()" />
+        on
+        <span class="number" tal:content="python:context.toLocalizedTime(last_query_runtime['time'], long_format=True)" />.
+      </tal:block> 
     </p>
 
     <label i18n:translate="">JSON Url:</label>

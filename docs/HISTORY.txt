@@ -3,7 +3,9 @@ Changelog
 
 5.6.dev0 - (unreleased)
 -----------------------
-
+* Bug fix: Update cached results for a SPARQL query after modifying it.
+  [chiridra refs #74166]
+  
 5.5 - (2016-05-19)
 ------------------
 * Bug fix: Fix pylint warnings
