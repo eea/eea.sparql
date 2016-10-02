@@ -12,7 +12,7 @@ from time import time
 import re
 
 from Products.CMFCore.utils import getToolByName
-from plone.app.layout.viewlets.content import ContentHistoryView 
+from plone.app.layout.viewlets.content import ContentHistoryView
 from Products.Five import BrowserView
 from Products.ZSPARQLMethod.Method import interpolate_query
 from Products.ZSPARQLMethod.Method import interpolate_query_html
@@ -87,7 +87,8 @@ class Sparql(BrowserView):
             the query has run.
         """
         try:
-            history = ContentHistoryView(self.context, self.request).fullHistory()
+            history = ContentHistoryView(self.context,
+                self.request).fullHistory()
         except Exception:
             history = []
         r = None
