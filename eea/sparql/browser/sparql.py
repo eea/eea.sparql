@@ -88,7 +88,7 @@ class Sparql(BrowserView):
         """
         try:
             history = ContentHistoryView(self.context, self.request).fullHistory()
-        except Exception, err:
+        except Exception:
             history = []
         r = None
         if history:

@@ -5,7 +5,7 @@ from zope.component import getUtility
 from plone.app.async.interfaces import IAsyncService
 from Products.Archetypes.interfaces import IObjectInitializedEvent
 from eea.sparql.content.sparql import async_updateLastWorkingResults
-from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
+from eea.sparql.interfaces import ISparqlBookmarksFolder
 from Products.statusmessages.interfaces import IStatusMessage
 
 def bookmarksfolder_added(obj, evt):
