@@ -5,7 +5,9 @@ Changelog
 -----------------------
 * Bug fix: Update cached results for a SPARQL query after modifying it.
   [chiridra refs #74166]
-  
+* Bug fix: fix broken control panel page template
+  [tiberich]
+
 5.5 - (2016-05-19)
 ------------------
 * Bug fix: Fix pylint warnings
@@ -64,7 +66,7 @@ Changelog
 
 4.7 - (2015-11-16)
 ------------------
-* Bug fix: Fixed upgrade step 4400 for eea.sparql to start all async jobs for 
+* Bug fix: Fixed upgrade step 4400 for eea.sparql to start all async jobs for
   sparal methods
   [szabozo0 refs #30673]
 
