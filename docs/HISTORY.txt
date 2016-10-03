@@ -1,8 +1,8 @@
 Changelog
 =========
 
-5.6.dev0 - (unreleased)
------------------------
+5.6 - (2016-10-03)
+------------------
 * Bug fix: Update cached results for a SPARQL query after modifying it.
   [chiridra refs #74166]
 * Bug fix: fix broken control panel page template
