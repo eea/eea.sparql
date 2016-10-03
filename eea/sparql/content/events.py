@@ -31,7 +31,7 @@ def sparql_added_or_modified(obj, evt):
 def sparql_modified(obj, evt):
     """ Flush cache when the object is modified and show a portal message
     """
-    #obj.invalidateSparqlCacheResults()
+    obj.invalidateSparqlCacheResults()
 
     anchor_url = '%s/@@view#sparql-stats' % obj.absolute_url()
 
