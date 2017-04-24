@@ -4,7 +4,7 @@ Changelog
 5.7.dev0 - (unreleased)
 -----------------------
 * Change: updated package information
-[eduard-fironda]
+  [eduard-fironda]
 
 5.6 - (2016-10-03)
 ------------------
