@@ -5,6 +5,10 @@ import BaseHTTPServer
 import threading
 
 import eea.sparql
+#port for mock http server
+from eea.sparql.tests.mock_server import PORT
+from eea.sparql.tests.mock_server import Handler
+
 from Products.Five import fiveconfigure
 from Products.Five import zcml
 from Products.PloneTestCase import PloneTestCase as ptc
@@ -20,10 +24,6 @@ from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import applyProfile
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import FunctionalTesting
-
-#port for mock http server
-from eea.sparql.tests.mock_server import PORT
-from eea.sparql.tests.mock_server import Handler
 
 
 @onsetup

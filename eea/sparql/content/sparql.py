@@ -3,18 +3,18 @@
 
 import cPickle
 import datetime
+from random import random
 import pytz
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
 from AccessControl import getSecurityManager
-from random import random
-
-from zope.interface import implements
-
-import DateTime
 from AccessControl.Permissions import view
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
+from zope.interface import implements
+from zope.component import getUtility
+from zope.event import notify
+import DateTime
 from Products.ATContentTypes.content import schemata, base
 from Products.ATContentTypes.content.folder import ATFolder
 from Products.Archetypes import atapi
@@ -44,8 +44,6 @@ from eea.versions import versions
 from eea.versions.interfaces import IVersionEnhanced, IGetVersions
 from plone.app.async.interfaces import IAsyncService
 from plone.app.blob.field import BlobField
-from zope.component import getUtility
-from zope.event import notify
 
 SparqlBaseSchema = atapi.Schema((
     StringField(

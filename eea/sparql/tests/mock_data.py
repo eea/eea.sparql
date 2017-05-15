@@ -2,12 +2,12 @@
 """
 
 from eea.sparql.content.sparql import Sparql
+from eea.sparql.tests.base import PORT
 from Products.ZSPARQLMethod.Method import parse_arg_spec, \
                                             map_arg_values, \
                                             run_with_timeout, \
                                             interpolate_query, \
                                             query_and_get_result
-from eea.sparql.tests.base import PORT
 
 def mock_sparql_query():
     """ mock query for sparql """

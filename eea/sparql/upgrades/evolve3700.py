@@ -34,4 +34,3 @@ def migrate_sparqls(context):
 
     logger.info('Migrated %s Sparqls ...', nbr_updated)
     return "Sparql Migration Done"
-

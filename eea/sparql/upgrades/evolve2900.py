@@ -61,4 +61,3 @@ def migrate_sparqls(context):
     logger.info('Sparqls with arguments: %s...', has_args)
     logger.info('Already Migrated %s Sparqls ...', already_migrated)
     return "Sparql Migration Done"
-

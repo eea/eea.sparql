@@ -2,11 +2,10 @@
 """
 from Products.statusmessages.interfaces import IStatusMessage
 from Products.validation.interfaces.IValidator import IValidator
-from zope.annotation import IAnnotations
-from zope.interface import implements
-
 from Products.ZSPARQLMethod.Method import run_with_timeout
 from Products.ZSPARQLMethod.Method import query_and_get_result
+from zope.annotation import IAnnotations
+from zope.interface import implements
 
 sparql = __import__('sparql')
 
@@ -94,4 +93,3 @@ class SparqlQueryValidator(object):
             IStatusMessage(request).addStatusMessage(msg, type='warning')
             return 1
         return 1
-

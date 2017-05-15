@@ -1,8 +1,7 @@
 """ Convert sparql results to json
 """
-
-import sparql
 import json as simplejson
+import sparql
 from zope.component import queryUtility
 from eea.sparql.converter import IGuessType
 from Products.ZSPARQLMethod import Method
