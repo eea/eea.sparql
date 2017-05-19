@@ -14,7 +14,7 @@ def bookmarksfolder_added(obj, evt):
 
 def sparql_added_or_modified(obj, evt):
     """Update last working results when sparql is added or modified"""
-    async = getUtility(IAsyncService)
+    async_service = getUtility(IAsyncService)
 
     obj.scheduled_at = DateTime.DateTime()
 
@@ -23,7 +23,7 @@ def sparql_added_or_modified(obj, evt):
         IObjectInitializedEvent.providedBy(evt):
         bookmarks_folder_added = True
 
-    async.queueJob(async_updateLastWorkingResults,
+    async_service.queueJob(async_updateLastWorkingResults,
                     obj,
                     scheduled_at=obj.scheduled_at,
                     bookmarks_folder_added=bookmarks_folder_added)

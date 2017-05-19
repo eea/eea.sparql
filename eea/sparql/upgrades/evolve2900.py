@@ -13,6 +13,7 @@ from zope.component import getUtility
 
 logger = logging.getLogger("eea.sparql.upgrades")
 
+
 def migrate_sparqls(context):
     """ Migrate sparqls for async update of last working results
     """
@@ -22,7 +23,7 @@ def migrate_sparqls(context):
     logger.info('Migrating %s Sparqls ...', len(brains))
     already_migrated = 0
     has_args = 0
-    async = getUtility(IAsyncService)
+    async_service = getUtility(IAsyncService)
 
     for brain in brains:
         obj = brain.getObject()
@@ -39,25 +40,25 @@ def migrate_sparqls(context):
         rows = cached_result.get('result', {}).get('rows', [])
 
         obj.scheduled_at = DateTime.DateTime()
-        if len(rows) == 0:
-            async.queueJob(async_updateLastWorkingResults,
-                obj,
-                scheduled_at=obj.scheduled_at,
-                bookmarks_folder_added=False)
+        if not rows:
+            async_service.queueJob(async_updateLastWorkingResults,
+                                   obj,
+                                   scheduled_at=obj.scheduled_at,
+                                   bookmarks_folder_added=False)
         else:
             if obj.refresh_rate != 'Once':
                 before = datetime.datetime.now(pytz.UTC)
                 delay = before + datetime.timedelta(days=1)
-                async.queueJobWithDelay(None,
-                                    delay,
-                                    async_updateLastWorkingResults,
-                                    obj,
-                                    scheduled_at=obj.scheduled_at,
-                                    bookmarks_folder_added=False)
+                async_service.queueJobWithDelay(
+                    None,
+                    delay,
+                    async_updateLastWorkingResults,
+                    obj,
+                    scheduled_at=obj.scheduled_at,
+                    bookmarks_folder_added=False)
 
-    logger.info('Migrated %s Sparqls ...', len(brains) - \
-                                            already_migrated - \
-                                            has_args)
+    logger.info('Migrated %s Sparqls ...',
+                len(brains) - already_migrated - has_args)
     logger.info('Sparqls with arguments: %s...', has_args)
     logger.info('Already Migrated %s Sparqls ...', already_migrated)
     return "Sparql Migration Done"

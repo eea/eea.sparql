@@ -43,8 +43,7 @@ class ScheduleStatus(BrowserView):
 
         if self.request.get('check_sendmail', None):
             return self.checkAllUnqSparqls()
-        else:
-            return self.index()
+        return self.index()
 
     def getAsyncJobs(self):
         """Returns the jobs from the async queue which are either
@@ -71,7 +70,7 @@ class ScheduleStatus(BrowserView):
         portal_path = self.context.getPhysicalPath()
 
         for job in self.getAsyncJobs():
-            if len(job.args) == 0:
+            if not job.args:
                 continue
             job_context = job.args[0]
             if isinstance(job_context, tuple) and \
@@ -165,7 +164,7 @@ class ScheduleStatus(BrowserView):
         # paths of unqueued sparqls
         unq_sparql_paths = set(self.unq_sparqls.keys())
 
-        if len(unq_sparql_paths) == 0:
+        if not unq_sparql_paths:
             return None
 
         for spq_path in unq_sparql_paths:

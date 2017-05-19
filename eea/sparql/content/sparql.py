@@ -275,10 +275,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                    has been disabled because it is too large.""",
                 msgtype="warn")
 
-        async = getUtility(IAsyncService)
+        async_service = getUtility(IAsyncService)
 
         self.scheduled_at = DateTime.DateTime()
-        async.queueJob(async_updateLastWorkingResults,
+        async_service.queueJob(async_updateLastWorkingResults,
                        self,
                        scheduled_at=self.scheduled_at,
                        bookmarks_folder_added=False)
@@ -304,11 +304,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
         if new_result.get("result", {}) != {}:
             if new_result != cached_result:
-                if len(new_result.get("result", {}).get("rows", {})) > 0:
+                if new_result.get("result", {}).get("rows", {}):
                     force_save = True
                 else:
-                    if len(cached_result.get('result', {}).get('rows', {})) \
-                            == 0:
+                    if not cached_result.get('result', {}).get('rows', {}):
                         force_save = True
 
         pr = getToolByName(self, 'portal_repository')
@@ -348,7 +347,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         """ override execute, if possible return the last working results
         """
         cached_result = self.getSparqlCacheResults()
-        if len(arg_values) == 0:
+        if not arg_values:
             return cached_result
 
         self.updateLastWorkingResults(**arg_values)
@@ -378,7 +377,7 @@ def async_updateLastWorkingResults(obj,
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
         if refresh_rate == 'Once':
             cached_result = obj.getSparqlCacheResults()
-            if len(cached_result.get('result', {}).get('rows', {})) == 0:
+            if not cached_result.get('result', {}).get('rows', {}):
                 refresh_rate = 'Hourly'
         else:
             if bookmarks_folder_added:
@@ -393,9 +392,9 @@ def async_updateLastWorkingResults(obj,
         if refresh_rate == "Weekly":
             delay = before + datetime.timedelta(weeks=1)
         if refresh_rate != "Once":
-            async = getUtility(IAsyncService)
+            async_service = getUtility(IAsyncService)
             obj.scheduled_at = DateTime.DateTime()
-            async.queueJobWithDelay(None,
+            async_service.queueJobWithDelay(None,
                                     delay,
                                     async_updateLastWorkingResults,
                                     obj,
@@ -440,11 +439,9 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
                 break
         if not found:
             return 0
-        else:
-            if not changed:
-                return 1
-            else:
-                return 2
+        if not changed:
+            return 1
+        return 2
 
     def addOrUpdateQuery(self, title, endpoint, query):
         """Update an already existing query

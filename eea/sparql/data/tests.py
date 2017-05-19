@@ -4,8 +4,9 @@ import doctest
 import logging
 import unittest
 
-from eea.sparql.tests.base import FUNCTIONAL_TESTING
 from plone.testing import layered
+
+from eea.sparql.tests.base import FUNCTIONAL_TESTING
 
 try:
     from eea.app.visualization import interfaces as VISUALIZATION
@@ -19,6 +20,7 @@ logger = logging.getLogger('eea.sparql')
 OPTIONFLAGS = (doctest.REPORT_ONLY_FIRST_FAILURE |
                doctest.ELLIPSIS |
                doctest.NORMALIZE_WHITESPACE)
+
 
 def test_suite():
     """ Suite

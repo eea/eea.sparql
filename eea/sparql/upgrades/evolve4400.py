@@ -11,11 +11,12 @@ import transaction
 
 logger = logging.getLogger("eea.sparql.upgrades")
 
+
 def restart_sparqls(context):
     """ Migrate sparqls with the new arguments format (name:type query)
     """
 
-    async = getUtility(IAsyncService)
+    async_service = getUtility(IAsyncService)
     catalog = getToolByName(context, 'portal_catalog')
     brains = catalog.searchResults(portal_type='Sparql')
 
@@ -32,17 +33,17 @@ def restart_sparqls(context):
             brain.getPath() != '/www/SITE/sandbox/antonio-tests/aq' and \
             brain.getPath() != '/www/SITE/sandbox/antonio-tests/aq-1' and \
             brain.getPath() != '/www/SITE/data-and-maps/daviz/eionet/data/'\
-            'inspire-monitoring-and-reporting-atbe-ref-years-2011-2012':
+                'inspire-monitoring-and-reporting-atbe-ref-years-2011-2012':
             obj = brain.getObject()
             if obj.getRefresh_rate() != 'Once':
                 obj.scheduled_at = DateTime.DateTime()
-                async.queueJob(async_updateLastWorkingResults,
-                            obj,
-                            scheduled_at=obj.scheduled_at,
-                            bookmarks_folder_added=False)
+                async_service.queueJob(async_updateLastWorkingResults,
+                                       obj,
+                                       scheduled_at=obj.scheduled_at,
+                                       bookmarks_folder_added=False)
                 restarted += 1
                 transaction.commit()
 
-    message = 'Restarted %s Sparqls ...' %restarted
+    message = 'Restarted %s Sparqls ...' % restarted
     logger.info(message)
     return message

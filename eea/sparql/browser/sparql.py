@@ -66,7 +66,7 @@ class Sparql(BrowserView):
 
     def hasResults(self, argument=None):
         """Tests whether the query has results or not"""
-        if len(self.getQueryResults(argument)) > 0:
+        if self.getQueryResults(argument):
             return True
         return False
 
