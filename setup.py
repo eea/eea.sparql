@@ -41,7 +41,6 @@ setup(name=NAME,
           'Products.ZSPARQLMethod',
           'Products.DataGridField',
           'eea.versions',
-          'plone.app.async'
       ],
       extras_require={
           'test': [

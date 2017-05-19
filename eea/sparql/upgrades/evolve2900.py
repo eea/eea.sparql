@@ -8,8 +8,8 @@ import pytz
 import DateTime
 from Products.CMFCore.utils import getToolByName
 from eea.sparql.content.sparql import async_updateLastWorkingResults
-from plone.app.async.interfaces import IAsyncService
-from zope.component import getUtility
+from eea.sparql.async import IAsyncService
+from zope.component import queryUtility
 
 logger = logging.getLogger("eea.sparql.upgrades")
 
@@ -23,7 +23,10 @@ def migrate_sparqls(context):
     logger.info('Migrating %s Sparqls ...', len(brains))
     already_migrated = 0
     has_args = 0
-    async_service = getUtility(IAsyncService)
+    async_service = queryUtility(IAsyncService)
+    if async_service is None:
+        logger.warn("Can't migrate_sparqls. plone.app.async NOT installed!")
+        return
 
     for brain in brains:
         obj = brain.getObject()
@@ -40,22 +43,27 @@ def migrate_sparqls(context):
         rows = cached_result.get('result', {}).get('rows', [])
 
         obj.scheduled_at = DateTime.DateTime()
+        async_queue = async_service.getQueues()['']
         if not rows:
-            async_service.queueJob(async_updateLastWorkingResults,
-                                   obj,
-                                   scheduled_at=obj.scheduled_at,
-                                   bookmarks_folder_added=False)
+            async_service.queueJobInQueue(
+                async_queue, ('sparql',),
+                async_updateLastWorkingResults,
+                obj,
+                scheduled_at=obj.scheduled_at,
+                bookmarks_folder_added=False
+            )
         else:
             if obj.refresh_rate != 'Once':
                 before = datetime.datetime.now(pytz.UTC)
                 delay = before + datetime.timedelta(days=1)
-                async_service.queueJobWithDelay(
-                    None,
-                    delay,
+                async_service.queueJobInQueueWithDelay(
+                    None, delay,
+                    async_queue, ('sparql',),
                     async_updateLastWorkingResults,
                     obj,
                     scheduled_at=obj.scheduled_at,
-                    bookmarks_folder_added=False)
+                    bookmarks_folder_added=False
+                )
 
     logger.info('Migrated %s Sparqls ...',
                 len(brains) - already_migrated - has_args)

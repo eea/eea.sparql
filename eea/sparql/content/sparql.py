@@ -4,6 +4,7 @@
 import cPickle
 import datetime
 from random import random
+import logging
 import pytz
 from AccessControl import ClassSecurityInfo
 from AccessControl import SpecialUsers
@@ -12,7 +13,7 @@ from AccessControl.Permissions import view
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
 from zope.interface import implements
-from zope.component import getUtility
+from zope.component import queryUtility
 from zope.event import notify
 import DateTime
 from Products.ATContentTypes.content import schemata, base
@@ -42,8 +43,10 @@ from eea.sparql.events import SparqlBookmarksFolderAdded
 from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.versions import versions
 from eea.versions.interfaces import IVersionEnhanced, IGetVersions
-from plone.app.async.interfaces import IAsyncService
+from eea.sparql.async import IAsyncService
 from plone.app.blob.field import BlobField
+logger = logging.getLogger("eea.sparql")
+
 
 SparqlBaseSchema = atapi.Schema((
     StringField(
@@ -275,13 +278,21 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                    has been disabled because it is too large.""",
                 msgtype="warn")
 
-        async_service = getUtility(IAsyncService)
+        async_service = queryUtility(IAsyncService)
+        if async_service is None:
+            logger.warn(
+                "Can't invalidateWorkingResult. plone.app.async NOT installed!")
+            return
 
         self.scheduled_at = DateTime.DateTime()
-        async_service.queueJob(async_updateLastWorkingResults,
-                       self,
-                       scheduled_at=self.scheduled_at,
-                       bookmarks_folder_added=False)
+        async_queue = async_service.getQueues()['']
+        async_service.queueJobInQueue(
+            async_queue, ('sparql',),
+            async_updateLastWorkingResults,
+            self,
+            scheduled_at=self.scheduled_at,
+            bookmarks_folder_added=False
+        )
 
     security.declareProtected(view, 'updateLastWorkingResults')
     def updateLastWorkingResults(self, **arg_values):
@@ -392,15 +403,22 @@ def async_updateLastWorkingResults(obj,
         if refresh_rate == "Weekly":
             delay = before + datetime.timedelta(weeks=1)
         if refresh_rate != "Once":
-            async_service = getUtility(IAsyncService)
+            async_service = queryUtility(IAsyncService)
+            if async_service is None:
+                logger.warn("Can't async_updateLastWorkingResults. "
+                            "plone.app.async NOT installed!")
+                return
+
             obj.scheduled_at = DateTime.DateTime()
-            async_service.queueJobWithDelay(None,
-                                    delay,
-                                    async_updateLastWorkingResults,
-                                    obj,
-                                    scheduled_at=obj.scheduled_at,
-                                    bookmarks_folder_added=\
-                                        bookmarks_folder_added)
+            async_queue = async_service.getQueues()['']
+            async_service.queueJobInQueueWithDelay(
+                None, delay,
+                async_queue, ('sparql',),
+                async_updateLastWorkingResults,
+                obj,
+                scheduled_at=obj.scheduled_at,
+                bookmarks_folder_added=bookmarks_folder_added
+            )
 
 def generateUniqueId(type_name):
     """ generateUniqueIds for sparqls

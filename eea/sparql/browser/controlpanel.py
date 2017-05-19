@@ -10,8 +10,8 @@ from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
-from plone.app.async.interfaces import IAsyncService
-from zope.component import getUtility
+from eea.sparql.async import IAsyncService
+from zope.component import queryUtility
 
 
 class ScheduleStatus(BrowserView):
@@ -20,7 +20,7 @@ class ScheduleStatus(BrowserView):
 
     def __call__(self):
         self.logger = logging.getLogger("eea.sparql")
-        self.async_service = getUtility(IAsyncService)
+        self.async_service = queryUtility(IAsyncService)
         self.p_catalog = getToolByName(self.context, 'portal_catalog')
         self.spq_brains = self.p_catalog.searchResults(portal_type='Sparql')
 
@@ -49,6 +49,8 @@ class ScheduleStatus(BrowserView):
         """Returns the jobs from the async queue which are either
         queued or active
         """
+        if self.async_service is None:
+            return
 
         async_queue = self.async_service.getQueues()['']
 
@@ -114,16 +116,23 @@ class ScheduleStatus(BrowserView):
         """Refreshes a sparql query and schedules it in the async queue;
         the argument is the relative path of sparql object
         """
+        if self.async_service is None:
+            self.logger.warn(
+                "Can't restartSparql. plone.app.async NOT installed!")
+            return
 
-        spq_brain = self.p_catalog.searchResults(portal_type='Sparql',
-                                                  path=spq_path)[0]
+        spq_brain = self.p_catalog.searchResults(
+            portal_type='Sparql', path=spq_path)[0]
         spq_ob = spq_brain.getObject()
 
         if spq_ob and spq_ob.getRefresh_rate() != 'Once':
             spq_ob.scheduled_at = DateTime.DateTime()
             self.logger.info('[Restarting Sparql]: %s', spq_brain.getURL())
             try:
-                self.async_service.queueJob(async_updateLastWorkingResults,
+                async_queue = self.async_service.getQueues()['']
+                self.async_service.queueJobInQueue(
+                    async_queue, ('sparql',),
+                    async_updateLastWorkingResults,
                                         spq_ob,
                                         scheduled_at=spq_ob.scheduled_at,
                                         bookmarks_folder_added=False)

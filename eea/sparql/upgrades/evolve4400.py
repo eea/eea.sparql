@@ -3,8 +3,8 @@
 
 import logging
 from Products.CMFCore.utils import getToolByName
-from zope.component import getUtility
-from plone.app.async.interfaces import IAsyncService
+from zope.component import queryUtility
+from eea.sparql.async import IAsyncService
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 import DateTime
 import transaction
@@ -16,7 +16,11 @@ def restart_sparqls(context):
     """ Migrate sparqls with the new arguments format (name:type query)
     """
 
-    async_service = getUtility(IAsyncService)
+    async_service = queryUtility(IAsyncService)
+    if async_service is None:
+        logger.warn("Can't migrate_sparqls. plone.app.async NOT installed!")
+        return
+
     catalog = getToolByName(context, 'portal_catalog')
     brains = catalog.searchResults(portal_type='Sparql')
 
@@ -37,10 +41,14 @@ def restart_sparqls(context):
             obj = brain.getObject()
             if obj.getRefresh_rate() != 'Once':
                 obj.scheduled_at = DateTime.DateTime()
-                async_service.queueJob(async_updateLastWorkingResults,
-                                       obj,
-                                       scheduled_at=obj.scheduled_at,
-                                       bookmarks_folder_added=False)
+                async_queue = async_service.getQueues()['']
+                async_service.queueJobInQueue(
+                    async_queue, ('sparql',),
+                    async_updateLastWorkingResults,
+                    obj,
+                    scheduled_at=obj.scheduled_at,
+                    bookmarks_folder_added=False
+                )
                 restarted += 1
                 transaction.commit()
 
