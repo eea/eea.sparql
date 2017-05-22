@@ -1,8 +1,8 @@
 Changelog
 =========
 
-5.9.dev0 - (unreleased)
------------------------
+5.9 - (2017-05-22)
+------------------
 * Change: Add dedicated async quota for Sparql jobs
   [avoinea refs #84915]
 * Change: Remove hard-dependency on plone.app.async
