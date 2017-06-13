@@ -6,6 +6,7 @@ import logging
 import datetime
 import DateTime
 
+from zope.interface import Interface, implementer
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
@@ -32,6 +33,15 @@ def sparql_check_sendmail(context):
         )
 
 
+class IScheduleStatus(Interface):
+    """ Control Panel Schedule
+    """
+    def schedule_check(self):
+        """ Schedule check to zc.async
+        """
+
+
+@implementer(IScheduleStatus)
 class ScheduleStatus(BrowserView):
     """ Async Schedule Status of Sparql Queries
     """

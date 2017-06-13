@@ -9,7 +9,7 @@
         class=".controlpanel.ScheduleStatus"
         template="schedule_status.pt"
         permission="eea.sparql.add"
-        allowed_attributes="schedule_check"
+        allowed_interface=".controlpanel.IScheduleStatus"
         />
 
     <browser:page
