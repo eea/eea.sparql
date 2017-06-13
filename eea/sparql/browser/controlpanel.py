@@ -1,18 +1,18 @@
 """ Control panel
 """
-import pytz
 import inspect
 import logging
 import datetime
+import pytz
 import DateTime
 
+from zope.component import queryUtility
 from zope.interface import Interface, implementer
 from Products.CMFCore.utils import getToolByName
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 from eea.sparql.async import IAsyncService
-from zope.component import queryUtility
 logger = logging.getLogger("eea.sparql")
 
 
