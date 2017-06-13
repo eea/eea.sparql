@@ -1,35 +1,57 @@
 """ Control panel
 """
+import pytz
 import inspect
 import logging
+import datetime
 import DateTime
 
-from AccessControl import getSecurityManager, Unauthorized
-
-from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 from eea.sparql.async import IAsyncService
 from zope.component import queryUtility
+logger = logging.getLogger("eea.sparql")
+
+
+def sparql_check_sendmail(context):
+    """ Check sparql and send email
+    """
+    status = ScheduleStatus(context, {})
+    status(check_sendmail=True)
+
+    async_service = queryUtility(IAsyncService)
+    if async_service is not None:
+        delay = datetime.timedelta(days=1)
+        queue = async_service.getQueues()['']
+        async_service.queueJobInQueueWithDelay(
+            None, datetime.datetime.now(pytz.UTC) + delay,
+            queue, ('sparql',),
+            sparql_check_sendmail,
+            context,
+        )
 
 
 class ScheduleStatus(BrowserView):
     """ Async Schedule Status of Sparql Queries
     """
 
-    def __call__(self):
-        self.logger = logging.getLogger("eea.sparql")
-        self.async_service = queryUtility(IAsyncService)
-        self.p_catalog = getToolByName(self.context, 'portal_catalog')
-        self.spq_brains = self.p_catalog.searchResults(portal_type='Sparql')
+    def schedule_check(self):
+        """ Schedule zc.async job to check and send email periodically
+        """
+        async_service = queryUtility(IAsyncService)
+        if not async_service:
+            return sparql_check_sendmail(self.context)
 
-        if not self.request.get('check_sendmail', None):
-            sm = getSecurityManager()
-            if not sm.checkPermission(ManagePortal, self.context):
-                raise Unauthorized(
-                        "You are not authorized to access this resource.")
+        queue = async_service.getQueues()['']
+        async_service.queueJobInQueue(
+            queue, ('sparql',),
+            sparql_check_sendmail,
+            self.context
+        )
+        return 'OK'
 
+    def __call__(self, check_sendmail=False):
         start_spq_path = self.request.get('start_spq_path', None)
         if start_spq_path:
             self.restartSparql(start_spq_path)
@@ -41,18 +63,20 @@ class ScheduleStatus(BrowserView):
 
         self.updUnqSparqlStatus()
 
-        if self.request.get('check_sendmail', None):
+        if check_sendmail:
             return self.checkAllUnqSparqls()
+
         return self.index()
 
     def getAsyncJobs(self):
         """Returns the jobs from the async queue which are either
         queued or active
         """
-        if self.async_service is None:
+        async_service = queryUtility(IAsyncService)
+        if async_service is None:
             return
 
-        async_queue = self.async_service.getQueues()['']
+        async_queue = async_service.getQueues()['']
 
         # queued jobs
         for job in async_queue:
@@ -101,7 +125,9 @@ class ScheduleStatus(BrowserView):
         # details of unqueued sparqls
         self.unq_sparqls = {}
 
-        for brain in self.spq_brains:
+        p_catalog = getToolByName(self.context, 'portal_catalog')
+        spq_brains = p_catalog.searchResults(portal_type='Sparql')
+        for brain in spq_brains:
             spq_path = brain.getPath()
             if spq_path not in q_sparql_paths:
                 spq_ob = brain.getObject()
@@ -116,28 +142,30 @@ class ScheduleStatus(BrowserView):
         """Refreshes a sparql query and schedules it in the async queue;
         the argument is the relative path of sparql object
         """
-        if self.async_service is None:
-            self.logger.warn(
+        async_service = queryUtility(IAsyncService)
+        if async_service is None:
+            logger.warn(
                 "Can't restartSparql. plone.app.async NOT installed!")
             return
 
-        spq_brain = self.p_catalog.searchResults(
+        p_catalog = getToolByName(self.context, 'portal_catalog')
+        spq_brain = p_catalog.searchResults(
             portal_type='Sparql', path=spq_path)[0]
         spq_ob = spq_brain.getObject()
 
         if spq_ob and spq_ob.getRefresh_rate() != 'Once':
             spq_ob.scheduled_at = DateTime.DateTime()
-            self.logger.info('[Restarting Sparql]: %s', spq_brain.getURL())
+            logger.info('[Restarting Sparql]: %s', spq_brain.getURL())
             try:
-                async_queue = self.async_service.getQueues()['']
-                self.async_service.queueJobInQueue(
+                async_queue = async_service.getQueues()['']
+                async_service.queueJobInQueue(
                     async_queue, ('sparql',),
                     async_updateLastWorkingResults,
                                         spq_ob,
                                         scheduled_at=spq_ob.scheduled_at,
                                         bookmarks_folder_added=False)
             except Exception, e:
-                self.logger.error("Got exception %s when restarting sparql %s",
+                logger.error("Got exception %s when restarting sparql %s",
                                       e, spq_brain.getURL())
 
     def updUnqSparqlStatus(self):
@@ -216,11 +244,11 @@ class ScheduleStatus(BrowserView):
         return_msg = "Found unqueued sparql queries. "
 
         try:
-            self.logger.info('Sending e-mail to %s', email_to)
+            logger.info('Sending e-mail to %s', email_to)
             mailhost.send(mfrom=email_from, mto=email_to,
                 subject=subject, messageText=body)
         except Exception, e:
-            self.logger.error("Got exception %s for %s", e, email_to)
+            logger.error("Got exception %s for %s", e, email_to)
             return_msg += "Error raised while attempting to send e-mail. "
         else:
             return_msg += "E-mail sent. "
