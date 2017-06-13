@@ -146,7 +146,7 @@ class ScheduleStatus(BrowserView):
                 if spq_ob.refresh_rate != 'Once':
                     self.unq_sparqls[spq_path] = {
                         'spq_title':brain.Title,
-                        'spq_url':brain.getURL(),
+                        'spq_url':brain.getPath(),
                         'spq_rrate':spq_ob.refresh_rate
                         }
 
@@ -167,7 +167,7 @@ class ScheduleStatus(BrowserView):
 
         if spq_ob and spq_ob.getRefresh_rate() != 'Once':
             spq_ob.scheduled_at = DateTime.DateTime()
-            logger.info('[Restarting Sparql]: %s', spq_brain.getURL())
+            logger.info('[Restarting Sparql]: %s', spq_brain.getPath())
             try:
                 async_queue = async_service.getQueues()['']
                 async_service.queueJobInQueue(
@@ -178,7 +178,7 @@ class ScheduleStatus(BrowserView):
                                         bookmarks_folder_added=False)
             except Exception, e:
                 logger.error("Got exception %s when restarting sparql %s",
-                                      e, spq_brain.getURL())
+                                      e, spq_brain.getPath())
 
     def updUnqSparqlStatus(self):
         """Updates the variable 'unq_sparql_status' which stores the view's
