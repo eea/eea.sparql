@@ -8,7 +8,8 @@ import DateTime
 
 from zope.interface import Interface, implementer
 from Products.CMFCore.utils import getToolByName
-from Products.Five import BrowserView
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from Products.Five.browser import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 from eea.sparql.async import IAsyncService
 from zope.component import queryUtility
@@ -45,6 +46,7 @@ class IScheduleStatus(Interface):
 class ScheduleStatus(BrowserView):
     """ Async Schedule Status of Sparql Queries
     """
+    index = ViewPageTemplateFile("schedule_status.pt")
 
     def schedule_check(self):
         """ Schedule zc.async job to check and send email periodically
