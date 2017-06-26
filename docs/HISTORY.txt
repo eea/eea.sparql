@@ -1,6 +1,9 @@
 Changelog
 =========
 
+6.1.dev0 - (unreleased)
+-----------------------
+
 6.0 - (2017-06-26)
 ------------------
 * Upgrade step: Call /www/@@sparql-schedule-controlpanel/schedule_check and check zc.async job
