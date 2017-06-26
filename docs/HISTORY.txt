@@ -1,8 +1,8 @@
 Changelog
 =========
 
-6.0.dev0 - (unreleased)
------------------------
+6.0 - (2017-06-26)
+------------------
 * Upgrade step: Call /www/@@sparql-schedule-controlpanel/schedule_check and check zc.async job
   scheduled to run daily via Site Setup >  Async Manager
   [avoinea refs #85379]
