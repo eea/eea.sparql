@@ -260,13 +260,18 @@ class Sparql(BrowserView):
     def sparql2json(self):
         """ Download sparql results as JSON
         """
-        headers = {'Accept' : 'application/sparql-results+json'}
+        try:
+            data = sparql2json(self.context.execute_query(
+                self.getArgumentMap()))
+        except Exception:
+            data = {'properties':{}, 'items':{}}
+
         self.request.response.setHeader(
             'Content-Type', 'application/json')
         self.request.response.setHeader(
             'Content-Disposition',
             'attachment; filename="%s.json"' % self.context.getId())
-        return self.sparql2response(headers=headers)
+        return json.dumps(data)
 
     def sparql2xml(self):
         """ Download sparql results as XML

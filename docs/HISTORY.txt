@@ -3,6 +3,9 @@ Changelog
 
 6.1.dev0 - (unreleased)
 -----------------------
+* Bug fix: Changed download.json to get data from cached results instead of
+  querying the results everytime from http://semantic.eea.europa.eu/sparql
+  [zoltan_andras refs #85891]
 
 6.0 - (2017-06-26)
 ------------------
