@@ -260,40 +260,35 @@ class Sparql(BrowserView):
     def sparql2json(self):
         """ Download sparql results as JSON
         """
-        try:
-            data = sparql2json(self.context.execute_query(
-                self.getArgumentMap()))
-        except Exception:
-            data = {'properties':{}, 'items':{}}
-
         self.request.response.setHeader(
             'Content-Type', 'application/json')
         self.request.response.setHeader(
             'Content-Disposition',
             'attachment; filename="%s.json"' % self.context.getId())
-        return json.dumps(data)
+
+        return self.context.getSparql_results_cached_json()
 
     def sparql2xml(self):
         """ Download sparql results as XML
         """
-        headers = {'Accept' : 'application/sparql-results+xml'}
         self.request.response.setHeader(
             'Content-Type', 'application/xml')
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.xml"' % self.context.getId())
-        return self.sparql2response(headers=headers)
+
+        return self.context.getSparql_results_cached_xml()
 
     def sparql2xmlWithSchema(self):
         """ Download sparql results as XML with schema
         """
-        headers = {'Accept' : 'application/x-ms-access-export+xml'}
         self.request.response.setHeader(
             'Content-Type', 'application/xml')
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.schema.xml"' % self.context.getId())
-        return self.sparql2response(headers=headers)
+
+        return self.context.getSparql_results_cached_xmlschema()
 
     def sparql2response(self, headers=None):
         """ Write

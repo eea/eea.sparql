@@ -25,6 +25,7 @@ from Products.Archetypes.atapi import SelectionWidget
 from Products.Archetypes.atapi import StringField, StringWidget, \
                                         BooleanWidget, BooleanField
 from Products.Archetypes.atapi import TextField, TextAreaWidget
+from Products.Archetypes.interfaces import IObjectInitializedEvent
 from Products.CMFCore.utils import getToolByName
 from Products.CMFEditions.interfaces.IModifier import FileTooLargeToVersionError
 from Products.DataGridField import DataGridField, DataGridWidget
@@ -35,6 +36,7 @@ from Products.ZSPARQLMethod.Method import ZSPARQLMethod, \
                                         run_with_timeout, \
                                         parse_arg_spec, \
                                         query_and_get_result, \
+                                        raw_query_and_get_result, \
                                         map_arg_values, QueryTimeout
 from ZODB.POSException import POSKeyError
 from eea.sparql.cache import ramcache, cacheSparqlKey, cacheSparqlMethodKey
@@ -47,6 +49,11 @@ from eea.sparql.async import IAsyncService
 from plone.app.blob.field import BlobField
 logger = logging.getLogger("eea.sparql")
 
+RESULTS_TYPES = {
+                 'xml' : "application/sparql-results+xml" ,
+                 'xmlschema' : "application/x-ms-access-export+xml",
+                 'json' : "application/sparql-results+json"
+                 }
 
 SparqlBaseSchema = atapi.Schema((
     StringField(
@@ -127,9 +134,32 @@ SparqlBaseSchema = atapi.Schema((
         required=0,
 
     ),
-
     BlobField(
         name='sparql_results_cached',
+        widget=TextAreaWidget(
+            label="Results",
+            visible={'edit':'invisible', 'view':'invisible'}
+        ),
+        required=0,
+    ),
+    BlobField(
+        name='sparql_results_cached_json',
+        widget=TextAreaWidget(
+            label="Results",
+            visible={'edit':'invisible', 'view':'invisible'}
+        ),
+        required=0,
+    ),
+    BlobField(
+        name='sparql_results_cached_xml',
+        widget=TextAreaWidget(
+            label="Results",
+            visible={'edit':'invisible', 'view':'invisible'}
+        ),
+        required=0,
+    ),
+    BlobField(
+        name='sparql_results_cached_xmlschema',
         widget=TextAreaWidget(
             label="Results",
             visible={'edit':'invisible', 'view':'invisible'}
@@ -294,9 +324,31 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             bookmarks_folder_added=False
         )
 
+    def _updateOtherCachedFormats(self, endpoint, query):
+        """ Run and store queries in sparql endpoints for xml, xmlschema, json
+        """
+        async_service = queryUtility(IAsyncService)
+        if async_service is None:
+            logger.warn(
+                "Can't invalidateWorkingResult. plone.app.async NOT installed!")
+            return
+
+        async_queue = async_service.getQueues()['']
+        scheduled_at = DateTime.DateTime()
+        delay = datetime.datetime.now(pytz.UTC)
+
+        for _type, accept in RESULTS_TYPES.items():
+            delay = delay + datetime.timedelta(minutes=1)
+            async_service.queueJobInQueueWithDelay(
+                None, delay,
+                async_queue, ('sparql',),
+                async_updateOtherCachedFormats,
+                self, endpoint, query, _type, accept
+            )
+
     security.declareProtected(view, 'updateLastWorkingResults')
     def updateLastWorkingResults(self, **arg_values):
-        """ update cached last working results of a query
+        """ update cached last working results of a query (json exhibit)
         """
         cached_result = self.getSparqlCacheResults()
         cooked_query = interpolate_query(self.query, arg_values)
@@ -310,7 +362,6 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         except QueryTimeout:
             new_result = {'exception': "query has ran - an timeout has"
                                        " been received"}
-
         force_save = False
 
         if new_result.get("result", {}) != {}:
@@ -323,8 +374,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
         pr = getToolByName(self, 'portal_repository')
         comment = "query has run - no result changes"
+
         if force_save:
             self.setSparqlCacheResults(new_result)
+            self._updateOtherCachedFormats(self.endpoint_url, cooked_query)
+
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
             if rows:
@@ -376,6 +430,34 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         else:
             return arg_values
 
+
+def async_updateOtherCachedFormats(obj, endpoint, query, _type, accept):
+
+        timeout = max(getattr(obj, 'timeout', 10), 10)
+        try:
+            new_result = run_with_timeout(
+                timeout,
+                raw_query_and_get_result, endpoint, query, accept=accept
+            )
+        except QueryTimeout:
+            new_result = ""
+            logger.warning(
+                "Query received timeout: %s with %s\n %s \n %s",
+                "/".join(obj.getPhysicalPath()), _type, endpoint, query
+            )
+            return
+
+        fieldName = "sparql_results_cached_" + _type
+        mutator = obj.Schema().getField(fieldName).getMutator(obj)
+
+        try:
+            result = new_result['result'].read()
+        except Exception, e:
+            logger.exception(
+                "Unable to read result from query: %s with %s\n %s \n %s",
+                "/".join(obj.getPhysicalPath()), _type, endpoint, query
+            )
+        mutator(result)
 
 def async_updateLastWorkingResults(obj,
                                 scheduled_at,
