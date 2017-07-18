@@ -49,7 +49,7 @@ from plone.app.blob.field import BlobField
 logger = logging.getLogger("eea.sparql")
 
 RESULTS_TYPES = {
-                 'xml' : "application/sparql-results+xml" ,
+                 'xml' : "application/sparql-results+xml",
                  'xmlschema' : "application/x-ms-access-export+xml",
                  'json' : "application/sparql-results+json"
                  }
@@ -430,32 +430,33 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
 
 def async_updateOtherCachedFormats(obj, endpoint, query, _type, accept):
+    """ Async that updates json, xml, xmlschema exports
+    """
+    timeout = max(getattr(obj, 'timeout', 10), 10)
+    try:
+        new_result = run_with_timeout(
+            timeout,
+            raw_query_and_get_result, endpoint, query, accept=accept
+        )
+    except QueryTimeout:
+        new_result = ""
+        logger.warning(
+            "Query received timeout: %s with %s\n %s \n %s",
+            "/".join(obj.getPhysicalPath()), _type, endpoint, query
+        )
+        return
 
-        timeout = max(getattr(obj, 'timeout', 10), 10)
-        try:
-            new_result = run_with_timeout(
-                timeout,
-                raw_query_and_get_result, endpoint, query, accept=accept
-            )
-        except QueryTimeout:
-            new_result = ""
-            logger.warning(
-                "Query received timeout: %s with %s\n %s \n %s",
-                "/".join(obj.getPhysicalPath()), _type, endpoint, query
-            )
-            return
+    fieldName = "sparql_results_cached_" + _type
+    mutator = obj.Schema().getField(fieldName).getMutator(obj)
 
-        fieldName = "sparql_results_cached_" + _type
-        mutator = obj.Schema().getField(fieldName).getMutator(obj)
-
-        try:
-            result = new_result['result'].read()
-        except Exception:
-            logger.exception(
-                "Unable to read result from query: %s with %s\n %s \n %s",
-                "/".join(obj.getPhysicalPath()), _type, endpoint, query
-            )
-        mutator(result)
+    try:
+        result = new_result['result'].read()
+    except Exception:
+        logger.exception(
+            "Unable to read result from query: %s with %s\n %s \n %s",
+            "/".join(obj.getPhysicalPath()), _type, endpoint, query
+        )
+    mutator(result)
 
 def async_updateLastWorkingResults(obj,
                                 scheduled_at,
