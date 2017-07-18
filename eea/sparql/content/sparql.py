@@ -25,7 +25,6 @@ from Products.Archetypes.atapi import SelectionWidget
 from Products.Archetypes.atapi import StringField, StringWidget, \
                                         BooleanWidget, BooleanField
 from Products.Archetypes.atapi import TextField, TextAreaWidget
-from Products.Archetypes.interfaces import IObjectInitializedEvent
 from Products.CMFCore.utils import getToolByName
 from Products.CMFEditions.interfaces.IModifier import FileTooLargeToVersionError
 from Products.DataGridField import DataGridField, DataGridWidget
@@ -334,11 +333,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             return
 
         async_queue = async_service.getQueues()['']
-        scheduled_at = DateTime.DateTime()
         delay = datetime.datetime.now(pytz.UTC)
 
         for _type, accept in RESULTS_TYPES.items():
-            delay = delay + datetime.timedelta(minutes=1)
+            delay = delay + datetime.timedelta(minutes=5)
             async_service.queueJobInQueueWithDelay(
                 None, delay,
                 async_queue, ('sparql',),
@@ -452,7 +450,7 @@ def async_updateOtherCachedFormats(obj, endpoint, query, _type, accept):
 
         try:
             result = new_result['result'].read()
-        except Exception, e:
+        except Exception:
             logger.exception(
                 "Unable to read result from query: %s with %s\n %s \n %s",
                 "/".join(obj.getPhysicalPath()), _type, endpoint, query
