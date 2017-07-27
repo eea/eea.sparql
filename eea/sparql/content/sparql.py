@@ -323,9 +323,10 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             bookmarks_folder_added=False
         )
 
-    def _updateOtherCachedFormats(self, endpoint, query):
+    def _updateOtherCachedFormats(self, scheduled_at, endpoint, query):
         """ Run and store queries in sparql endpoints for xml, xmlschema, json
         """
+
         async_service = queryUtility(IAsyncService)
         if async_service is None:
             logger.warn(
@@ -341,13 +342,15 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                 None, delay,
                 async_queue, ('sparql',),
                 async_updateOtherCachedFormats,
-                self, endpoint, query, _type, accept
+                self,
+                scheduled_at, endpoint, query, _type, accept
             )
 
     security.declareProtected(view, 'updateLastWorkingResults')
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query (json exhibit)
         """
+
         cached_result = self.getSparqlCacheResults()
         cooked_query = interpolate_query(self.query, arg_values)
 
@@ -375,7 +378,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
         if force_save:
             self.setSparqlCacheResults(new_result)
-            self._updateOtherCachedFormats(self.endpoint_url, cooked_query)
+            self._updateOtherCachedFormats(self.last_scheduled_at, self.endpoint_url, cooked_query)
 
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
@@ -429,41 +432,47 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             return arg_values
 
 
-def async_updateOtherCachedFormats(obj, endpoint, query, _type, accept):
+def async_updateOtherCachedFormats(obj, scheduled_at, endpoint, query,
+                                    _type, accept):
     """ Async that updates json, xml, xmlschema exports
     """
-    timeout = max(getattr(obj, 'timeout', 10), 10)
-    try:
-        new_result = run_with_timeout(
-            timeout,
-            raw_query_and_get_result, endpoint, query, accept=accept
-        )
-    except QueryTimeout:
-        new_result = ""
-        logger.warning(
-            "Query received timeout: %s with %s\n %s \n %s",
-            "/".join(obj.getPhysicalPath()), _type, endpoint, query
-        )
-        return
 
-    fieldName = "sparql_results_cached_" + _type
-    mutator = obj.Schema().getField(fieldName).getMutator(obj)
+    if obj.last_scheduled_at == scheduled_at:
+        timeout = max(getattr(obj, 'timeout', 10), 10)
+        try:
+            new_result = run_with_timeout(
+                timeout,
+                raw_query_and_get_result, endpoint, query, accept=accept
+            )
+        except QueryTimeout:
+            new_result = ""
+            logger.warning(
+                "Query received timeout: %s with %s\n %s \n %s",
+                "/".join(obj.getPhysicalPath()), _type, endpoint, query
+            )
+            return
 
-    try:
-        result = new_result['result'].read()
-    except Exception:
-        logger.exception(
-            "Unable to read result from query: %s with %s\n %s \n %s",
-            "/".join(obj.getPhysicalPath()), _type, endpoint, query
-        )
-    mutator(result)
+        fieldName = "sparql_results_cached_" + _type
+        mutator = obj.Schema().getField(fieldName).getMutator(obj)
+
+        try:
+            result = new_result['result'].read()
+        except Exception:
+            logger.exception(
+                "Unable to read result from query: %s with %s\n %s \n %s",
+                "/".join(obj.getPhysicalPath()), _type, endpoint, query
+            )
+        mutator(result)
+
 
 def async_updateLastWorkingResults(obj,
                                 scheduled_at,
                                 bookmarks_folder_added=False):
     """ Async update last working results
     """
+
     if obj.scheduled_at == scheduled_at:
+        obj.last_scheduled_at = scheduled_at
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")

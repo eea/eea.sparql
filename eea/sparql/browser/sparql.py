@@ -7,9 +7,11 @@ import json
 import logging
 import urllib
 import urllib2
+import DateTime
 from time import time
 
 import re
+from plone import api
 from plone.app.layout.viewlets.content import ContentHistoryView
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
@@ -276,6 +278,19 @@ class Sparql(BrowserView):
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.xml"' % self.context.getId())
+
+        cached_xml = self.context.getSparql_results_cached_xml()
+
+        if not cached_xml or (cached_xml and not cached_xml.get_size()):
+            self.context.last_scheduled_at = DateTime.DateTime()
+            self.context._updateOtherCachedFormats(
+                self.context.last_scheduled_at,
+                self.context.endpoint_url,
+                self.context.query)
+            api.portal.show_message(
+                message="The data will be updated shortly. Please retry later.",
+                request=self.request)
+            return self.request.response.redirect(self.context.absolute_url())
 
         return self.context.getSparql_results_cached_xml()
 
