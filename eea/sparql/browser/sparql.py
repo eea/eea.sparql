@@ -254,6 +254,22 @@ class Sparql(BrowserView):
 
         return ''
 
+
+    def sparqlTriggerAsync(self, cached_data):
+        """ Verify if cached data exists, if not trigger async job
+        """
+        if not cached_data or (cached_data and not cached_data.get_size()):
+            self.context.last_scheduled_at = DateTime.DateTime()
+            self.context._updateOtherCachedFormats(
+                self.context.last_scheduled_at,
+                self.context.endpoint_url,
+                self.context.query)
+            api.portal.show_message(
+                message="The data will be updated shortly. Please retry later.",
+                request=self.request)
+            return self.request.response.redirect(self.context.absolute_url())
+
+
     def sparql2tsv(self, dialect='excel.tsv'):
         """ Download sparql results as Tab Separated File
         """
@@ -268,6 +284,9 @@ class Sparql(BrowserView):
             'Content-Disposition',
             'attachment; filename="%s.json"' % self.context.getId())
 
+        cached_json = self.context.getSparql_results_cached_json()
+        self.sparqlTriggerAsync(cached_json)
+
         return self.context.getSparql_results_cached_json()
 
     def sparql2xml(self):
@@ -280,17 +299,7 @@ class Sparql(BrowserView):
                 'attachment; filename="%s.xml"' % self.context.getId())
 
         cached_xml = self.context.getSparql_results_cached_xml()
-
-        if not cached_xml or (cached_xml and not cached_xml.get_size()):
-            self.context.last_scheduled_at = DateTime.DateTime()
-            self.context._updateOtherCachedFormats(
-                self.context.last_scheduled_at,
-                self.context.endpoint_url,
-                self.context.query)
-            api.portal.show_message(
-                message="The data will be updated shortly. Please retry later.",
-                request=self.request)
-            return self.request.response.redirect(self.context.absolute_url())
+        self.sparqlTriggerAsync(cached_xml)
 
         return self.context.getSparql_results_cached_xml()
 
@@ -302,6 +311,9 @@ class Sparql(BrowserView):
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.schema.xml"' % self.context.getId())
+
+        cached_xml_schema = self.context.getSparql_results_cached_xmlschema()
+        self.sparqlTriggerAsync(cached_xml_schema)
 
         return self.context.getSparql_results_cached_xmlschema()
 
