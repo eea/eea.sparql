@@ -378,7 +378,8 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
         if force_save:
             self.setSparqlCacheResults(new_result)
-            self._updateOtherCachedFormats(self.last_scheduled_at, self.endpoint_url, cooked_query)
+            self._updateOtherCachedFormats(self.last_scheduled_at,
+                self.endpoint_url, cooked_query)
 
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})

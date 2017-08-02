@@ -7,10 +7,10 @@ import json
 import logging
 import urllib
 import urllib2
-import DateTime
 from time import time
-
 import re
+import DateTime
+
 from plone import api
 from plone.app.layout.viewlets.content import ContentHistoryView
 from Products.CMFCore.utils import getToolByName
