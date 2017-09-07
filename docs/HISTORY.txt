@@ -3,6 +3,8 @@ Changelog
 
 6.3.dev0 - (unreleased)
 -----------------------
+* Bug fix: fixed download error when no result is received
+  [alecghica refs #87576]
 
 6.2 - (2017-08-16)
 ------------------

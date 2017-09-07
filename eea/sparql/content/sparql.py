@@ -459,6 +459,7 @@ def async_updateOtherCachedFormats(obj, scheduled_at, endpoint, query,
         try:
             result = new_result['result'].read()
         except Exception:
+            result = ""
             logger.exception(
                 "Unable to read result from query: %s with %s\n %s \n %s",
                 "/".join(obj.getPhysicalPath()), _type, endpoint, query
