@@ -7,15 +7,16 @@
       i18n:domain="plone">
     <body>
         <div metal:fill-slot="prefs_configlet_main">
-            <h1 class="documentFirstHeading">Sparql Async Queue Status</h1>
-            <p class="discreet">Details about sparql queries with a repeatable refresh rate, which are not scheduled in the async queue.</p>
+            <h1 class="documentFirstHeading" i18n:translate="">Sparql Async Queue Status</h1>
+            <p class="discreet" i18n:translate="">Details about sparql queries with a repeatable refresh rate, which are not scheduled in the async queue.</p>
 
             <div tal:condition="view/getUnqSparqlStatus">
-                <div class="portalMessage warningMessage">
-                     <span tal:define="results view/getUnqSparqlStatus" tal:content="python:len(results)"></span> sparql queries are not scheduled in the async queue.
+                <div class="portalMessage warningMessage" i18n:translate="">
+                  <span tal:define="results view/getUnqSparqlStatus" tal:content="python:len(results)" i18n:name="number"></span>
+                  sparql queries are not scheduled in the async queue.
                 </div>
 
-                <div class="portalMessage attentionMessage">
+                <div class="portalMessage attentionMessage" i18n:translate="">
                     Restarting too many SPARQL Methods at once may take a long time and can end up in a timeout.<br/>
                     To avoid that, it is recommended to use a service instance to bypass Apache.
                 </div>
@@ -24,20 +25,20 @@
                     tal:condition="view/getUnqSparqlStatus"
                     tal:attributes="action string:${here/absolute_url}/@@sparql-schedule-controlpanel">
                     <input type="hidden" name="start_all_spq" value="T"/>
-                    <input type="submit" value="Schedule all now"/>
+                    <input type="submit" value="Schedule all now" i18n:attributes="value"/>
                 </form>
             </div>
 
-            <div tal:condition="not:view/getUnqSparqlStatus" class="portalMessage thumbsUpMessage">
+            <div tal:condition="not:view/getUnqSparqlStatus" class="portalMessage thumbsUpMessage" i18n:translate="">
                 There are no unqueued sparql queries.
             </div>
 
             <table tal:condition="view/getUnqSparqlStatus" class="listing">
                 <thead>
                     <tr>
-                        <th style="width: 100%;">Sparql Name</th>
-                        <th>Refresh Rate</th>
-                        <th>Action</th>
+                        <th style="width: 100%;" i18n:translate="">Sparql Name</th>
+                        <th i18n:translate="">Refresh Rate</th>
+                        <th i18n:translate="">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,7 +49,7 @@
                             <form method="POST" enctype="multipart/form-data"
                                 tal:attributes="action string:${here/absolute_url}/@@sparql-schedule-controlpanel">
                                 <input type="hidden" name="start_spq_path" tal:attributes="value sparql/path"/>
-                                <input type="submit" value="Schedule now"/>
+                                <input type="submit" value="Schedule now" i18n:attributes="value"/>
                             </form>
                         </td>
                     </tr>

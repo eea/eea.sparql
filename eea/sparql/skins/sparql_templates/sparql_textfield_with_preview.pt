@@ -104,7 +104,7 @@
             <option selected="selected"
                     value=""
                     tal:attributes="value contentType"
-                    tal:condition="python:contenttype not in mimetypes">
+                    tal:condition="python:contenttype not in mimetypes" i18n:translate="">
               (no change)
             </option>
             <option tal:repeat="item mimetypes"
@@ -137,11 +137,11 @@
           <script type="text/javascript" tal:content="string: var portal_url = '${context/portal_url}'; var absolute_url = '${context/absolute_url}'">
           </script>
 
-          <label class="sparql-preview-label">Test and preview the query</label><br/>
-          <span class="sparql-preview-arguments-helper formHelper">This will run the query on the endpoint without saving the query in plone.</span><br/>
-          <input class="sparql-query-results-preview" type="button" value="Test and preview query"/><br/>
-          <label class="sparql-preview-arguments-label">Arguments for preview (optional)</label><br/>
-          <span class="sparql-preview-arguments-helper formHelper">Arguments for preview should look like: arg1=value1&amp;arg2=value2</span><br/>
+          <label class="sparql-preview-label" i18n:translate="">Test and preview the query</label><br/>
+          <span class="sparql-preview-arguments-helper formHelper" i18n:translate="">This will run the query on the endpoint without saving the query in plone.</span><br/>
+          <input class="sparql-query-results-preview" type="button" value="Test and preview query" i18n:attributes="value"/><br/>
+          <label class="sparql-preview-arguments-label" i18n:translate="">Arguments for preview (optional)</label><br/>
+          <span class="sparql-preview-arguments-helper formHelper" i18n:translate="">Arguments for preview should look like: arg1=value1&amp;arg2=value2</span><br/>
           <input class="sparql-preview-arguments" type="text"/> <br/>
       </div>
     </metal:define>

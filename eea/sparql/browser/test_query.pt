@@ -26,12 +26,14 @@
     <pre tal:content="structure options/query"/>
 </code>
 
-<p class="sparql-stats" tal:condition="options/data">
+<p class="sparql-stats" tal:condition="options/data" i18n:translate="">
   Received
-  <span class="number" tal:content="python:len(options['data']['rows'])"/>
-  rows<tal:block condition="python:'duration' in options"> in
-    <span class="number" tal:content="python:'%.3f' % options['duration']"/>
-  seconds</tal:block>.
+  <span class="number" tal:content="python:len(options['data']['rows'])" i18n:name="rows"/>
+  rows
+  <tal:block condition="python:'duration' in options"> in
+    <span class="number" tal:content="python:'%.3f' % options['duration']" i18n:name="time"/>
+  seconds
+  </tal:block>.
 </p>
 
 <table class="sparql-results" tal:condition="options/data">
@@ -52,14 +54,14 @@
 <p class="sparql-has-result"
    tal:define="has_result options/data/has_result|nothing"
    tal:condition="python: has_result is not None">
-   
-      <tal:block condition="has_result" i18n:translate=""> 
+
+      <tal:block condition="has_result" i18n:translate="">
           Query will return a result.
       </tal:block>
       <tal:block condition="not:has_result" i18n:translate="">
           Query will not return a result.
-      </tal:block>    
-   
+      </tal:block>
+
 </p>
 
 <code class="sparql-error" tal:condition="options/error|nothing">

@@ -35,27 +35,27 @@
     </div>
 
     <h3 i18n:translate="">Dataset preview</h3>
-    <h4 tal:condition="context/sparql_static">(Static Query)</h4>
-    <h4 tal:condition="not:context/sparql_static">(Live Query)</h4>
+    <h4 tal:condition="context/sparql_static" i18n:translate="">(Static Query)</h4>
+    <h4 tal:condition="not:context/sparql_static" i18n:translate="">(Live Query)</h4>
     <div tal:define="data options/data">
       <div class="eea-sparql-table" style="overflow: hidden">
         <metal:table use-macro="here/@@sparql.preview/macros/table" />
       </div>
     </div>
 
-    <p class="sparql-stats" tal:condition="options/data">
-      <a name="sparql-stats"></a>
+    <p class="sparql-stats" tal:condition="options/data" i18n:translate="">
+      <a name="sparql-stats" i18n:name="icon"></a>
       Received
-      <span class="number" tal:content="python:len(options['data']['rows'])"/>
+      <span class="number" tal:content="python:len(options['data']['rows'])" i18n:name="rows"/>
       rows<tal:block condition="python:'duration' in options"> in
-      <span class="number" tal:content="python:'%.3f' % options['duration']"/>
+      <span class="number" tal:content="python:'%.3f' % options['duration']" i18n:name="time"/>
       seconds</tal:block>.
       <tal:block tal:define="last_query_runtime view/getLastQueryRunTime" tal:condition="last_query_runtime">
         <br />
-        <span tal:replace="python:last_query_runtime['comments'].capitalize()" />
+        <span tal:replace="python:last_query_runtime['comments'].capitalize()" i18n:name="comments"/>
         on
-        <span class="number" tal:content="python:context.toLocalizedTime(last_query_runtime['time'], long_format=True)" />.
-      </tal:block> 
+        <span class="number" tal:content="python:context.toLocalizedTime(last_query_runtime['time'], long_format=True)" i18n:name="date"/>.
+      </tal:block>
     </p>
 
     <label i18n:translate="">JSON Url:</label>
@@ -91,7 +91,7 @@
                    tal:attributes="name input_name; value prev_value; id input_name"/>
             <select tal:condition="has_results"
                     tal:attributes="name input_name; id input_name">
-              <option value="default">Please select a value for the argument</option>
+              <option value="default" i18n:translate="">Please select a value for the argument</option>
               <option tal:repeat="result python:view.getQueryResults(arg)"
                       tal:attributes="value python:result[0]; selected python:(str(result[0]) == request.form.get(arg))"
                       tal:content="python:result[1]"
@@ -122,7 +122,7 @@
     </p>
 
     <div tal:condition="options/error|nothing">
-        <h4 style="color:red">Error when running query:</h4>
+        <h4 style="color:red" i18n:translate="">Error when running query:</h4>
         <code class="sparql-error">
             <pre tal:content="options/error"/>
         </code>
@@ -131,7 +131,7 @@
     <tal:block tal:condition="python: isDaviz">
         <br/>
         <br/>
-        <input type="button" class="context" value="Create New Visualization"
+        <input type="button" class="context" value="Create New Visualization" i18n:attributes="value"
             tal:attributes="onclick string:javascript:document.location='${context/absolute_url}/daviz-create-new.html';"/>
     </tal:block>
 
