@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-11-09 13:19+0000\n"
+"POT-Creation-Date: 2017-09-19 12:27+0000\n"
 "PO-Revision-Date: 2013-05-11 22:30-0300\n"
 "Last-Translator: Gustavo Lepri <gustavolepri@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,14 +15,29 @@ msgstr ""
 "Domain: DOMAIN\n"
 "X-Generator: Poedit 1.5.4\n"
 
+#: ../../sparql/browser/view.pt:57
+msgid "${icon} Received ${rows} rows in ${time} seconds. <br /> ${comments} on ${date}."
+msgstr ""
+
+#: ../../sparql/browser/view.pt:39
+msgid "(Live Query)"
+msgstr ""
+
+#: ../../sparql/browser/view.pt:38
+msgid "(Static Query)"
+msgstr ""
+
 #: ../../sparql/browser/view-bookmarks.pt:24
 msgid "Action"
 msgstr "Ação"
 
-#: ../../sparql/browser/view.pt:64
+#: ../../sparql/browser/view.pt:71
 msgid "Are you new to Linked Data technology? visit http://linkeddata.org"
+msgstr "A tecnologia Linked Data é nova para você? Visite http://linkeddata.org"
+
+#: ../../sparql/browser/view.pt:134
+msgid "Create New Visualization"
 msgstr ""
-"A tecnologia Linked Data é nova para você? Visite http://linkeddata.org"
 
 #: ../../sparql/browser/view-bookmarks.pt:53
 msgid "Create Visualization"
@@ -36,20 +51,33 @@ msgstr "Informação do repositório de dados"
 msgid "Dataset"
 msgstr "Conjunto de dados"
 
-#: ../../sparql/browser/view.pt:38
+#: ../../sparql/browser/view.pt:37
 msgid "Dataset preview"
 msgstr "Visualização do conjunto de dados"
 
-#: ../../sparql/browser/view.pt:14
+#: ../../sparql/browser/view.pt:13
 msgid "Download this dataset"
 msgstr "Baixar este conjunto de dados"
 
-#: ../../sparql/browser/view-bookmarks.pt:128
+#: ../../sparql/browser/view-bookmarks.pt:130
 msgid "Downloads"
 msgstr "Downloads"
 
+#: ../../sparql/profiles.zcml:18
+msgid "EEA Sparql"
+msgstr ""
+
+#: ../../sparql/profiles.zcml:25
+msgid "EEA Sparql upgrade profile for v3.6"
+msgstr ""
+
+#: ../../sparql/browser/view.pt:125
+msgid "Error when running query:"
+msgstr ""
+
 #: ../../sparql/browser/test_query.pt:21
-#: ../../sparql/browser/view-bookmarks.pt:87 ../../sparql/browser/view.pt:86
+#: ../../sparql/browser/view-bookmarks.pt:87
+#: ../../sparql/browser/view.pt:102
 msgid "Execute"
 msgstr "Executar"
 
@@ -57,70 +85,76 @@ msgstr "Executar"
 msgid "Existing visualizations"
 msgstr "Visualizações existentes"
 
-#: ../../sparql/browser/view.pt:59
+#: ../../sparql/browser/view.pt:66
 msgid "For system integrators"
 msgstr "Para integradores de sistema"
 
-#: ../../sparql/browser/view.pt:15
+#: ../../sparql/browser/view.pt:14
 msgid "Formats suitable for human consumption"
 msgstr "Formatos adequados para consumo humano"
 
-#: ../../sparql/browser/view.pt:24
+#: ../../sparql/browser/view.pt:23
 msgid "Formats suitable for machine-to-machine communication"
 msgstr "Formatos adequados para comunicação máquina a máquina"
 
-#: ../../sparql/cache/caching.pt:15
-msgid "Invalidate cache"
-msgstr "Cache inválido"
-
-#: ../../sparql/browser/view.pt:54
+#: ../../sparql/browser/view.pt:61
 msgid "JSON Url:"
 msgstr "Url do JSON:"
 
-#: ../../sparql/browser/view.pt:60
+#: ../../sparql/browser/view.pt:67
 msgid "Linked Data query (SPARQL)"
 msgstr "Linked Data query (SPARQL)"
 
-#: ../../sparql/browser/test_query.pt:59
-#: ../../sparql/browser/view-bookmarks.pt:117 ../../sparql/browser/view.pt:102
+#: ../../sparql/browser/view.pt:94
+msgid "Please select a value for the argument"
+msgstr ""
+
+#: ../../sparql/browser/test_query.pt:61
+#: ../../sparql/browser/view-bookmarks.pt:119
+#: ../../sparql/browser/view.pt:118
 msgid "Query will not return a result."
 msgstr "A consulta não retornará um resultado."
 
-#: ../../sparql/browser/test_query.pt:56
-#: ../../sparql/browser/view-bookmarks.pt:114 ../../sparql/browser/view.pt:99
+#: ../../sparql/browser/test_query.pt:58
+#: ../../sparql/browser/view-bookmarks.pt:116
+#: ../../sparql/browser/view.pt:115
 msgid "Query will return a result."
 msgstr "A consulta retornará um resultado"
 
-#: ../../sparql/browser/view-bookmarks.pt:70 ../../sparql/browser/view.pt:68
+#: ../../sparql/browser/view-bookmarks.pt:100
+msgid "Received ${datasets} datasets (sparql queries) in ${time} seconds"
+msgstr ""
+
+#: ../../sparql/browser/test_query.pt:34
+msgid "Received ${rows} rows in ${time} seconds ."
+msgstr ""
+
+#: ../../sparql/browser/view-bookmarks.pt:70
+#: ../../sparql/browser/view.pt:75
 msgid "SPARQL Endpoint:"
 msgstr "SPARQL Endpoint:"
 
-#: ../../sparql/browser/view.pt:73
+#: ../../sparql/browser/view.pt:80
 msgid "SPARQL Query:"
 msgstr "Query SPARQL"
-
-#: ../../sparql/cache/caching.pt:6
-msgid "Set caching"
-msgstr "Definir cache"
 
 #: ../../sparql/browser/view-bookmarks.pt:74
 msgid "Synchronisation info"
 msgstr "Informações de sincronização"
 
-#: ../../sparql/browser/view-bookmarks.pt:104
+#: ../../sparql/browser/view-bookmarks.pt:106
 msgid "Synchronize Queries with Bookmarks"
 msgstr "Sincronizar Consultas com Marcadores"
 
-#: ../../sparql/browser/view.pt:61
-msgid ""
-"The following info can be used by a system developer / database "
-"administrator in order to retrieve this dataset programmatically over the "
-"web using a SPARQL client."
-msgstr ""
-"A informação a seguir pode ser usada por um desenvolvedor de sistemas / "
-"administrador de banco de dados com a finalidade de recuperar este conjunto "
-"de dados programaticamente através da rede usando um client SPARQL."
+#: ../../sparql/browser/view.pt:68
+msgid "The following info can be used by a system developer / database administrator in order to retrieve this dataset programmatically over the web using a SPARQL client."
+msgstr "A informação a seguir pode ser usada por um desenvolvedor de sistemas / administrador de banco de dados com a finalidade de recuperar este conjunto de dados programaticamente através da rede usando um client SPARQL."
 
-#: ../../sparql/browser/view-bookmarks.pt:138 ../../sparql/browser/view.pt:32
+#: ../../sparql/profiles.zcml:18
+msgid "Wrapper for Products.ZSPARQLMethod"
+msgstr ""
+
+#: ../../sparql/browser/view-bookmarks.pt:140
+#: ../../sparql/browser/view.pt:31
 msgid "XML with Schema"
 msgstr "XML com Schema"
