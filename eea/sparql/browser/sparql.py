@@ -115,8 +115,10 @@ class Sparql(BrowserView):
             res, error = {}, None
             try:
                 res = self.context.execute(**arg_values)
-            except Exception:
+            except Exception, err:
                 import traceback
+                logger.info('Failed on test')
+                logger.exception(err)
                 error = traceback.format_exc()
             data = res.get('result')
             error = error or res.get('exception')
@@ -140,20 +142,25 @@ class Sparql(BrowserView):
 
         column_types = kwargs.get('column_types')
         annotations = kwargs.get('annotations')
-        return sortProperties(json.dumps(
-            sparql2json(data,
-                        column_types=column_types,
-                        annotations=annotations)
-        ))
+        logger.info('Attempting Data to json')
+        try:
+            return sortProperties(json.dumps(
+                sparql2json(data,
+                            column_types=column_types,
+                            annotations=annotations)
+            ))
+        except KeyError, err:
+            logger.info('Failed json conversion.')
+            logger.exception(err)
 
     def sparql2exhibit(self):
         """ Download sparql results as Exhibit JSON
         """
-
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception:
+        except Exception, err:
+            logger.exception(err)
             data = {'properties':{}, 'items':{}}
 
         self.request.response.setHeader(
@@ -169,8 +176,16 @@ class Sparql(BrowserView):
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception:
+        except Exception, err:
             data = {'properties':{}, 'items':{}}
+            logger.exception(err)
+            api.portal.show_message(
+                message="HTML conversion failed", request=self.request)
+            api.portal.show_message(
+                message="There is an error in the query, HTML/CSV/TSV " \
+                        "conversions not possible: %s" % err,
+                request=self.request)
+            return self.request.response.redirect(self.context.index_html())
 
         result = []
         result.append(u"<style type='text/css'>")
@@ -208,8 +223,20 @@ class Sparql(BrowserView):
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception:
+        except Exception, err:
+            logger.exception(err)
             data = {'properties':{}, 'items':{}}
+            if dialect == 'excel':
+                api.portal.show_message(
+                    message="CSV conversion failed", request=self.request)
+            else:
+                api.portal.show_message(
+                    message="TSV conversion failed", request=self.request)
+            api.portal.show_message(
+                message="There is an error in the query, HTML/CSV/TSV " \
+                        "conversions not possible: %s" % err,
+                request=self.request)
+            return self.request.response.redirect(self.context.index_html())
 
         if dialect == 'excel':
             self.request.response.setHeader(

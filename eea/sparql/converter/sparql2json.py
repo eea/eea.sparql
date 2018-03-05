@@ -143,6 +143,7 @@ def sparql2json(data, **kwargs):
             idx += 1
             if isinstance(data_result['rows'][0][idx], sparql.Literal):
                 datatype = data_result['rows'][0][idx].datatype
+                import pdb; pdb.set_trace()
                 if not datatype:
                     datatype = ''
                 valueType = propertytype_dict[datatype]
