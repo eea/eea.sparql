@@ -192,7 +192,6 @@ SparqlBookmarksFolderSchema['sparql_query'].widget.description = \
 SparqlBookmarksFolderSchema['sparql_static'].widget.visible['edit'] = \
         'invisible'
 
-
 class Sparql(base.ATCTContent, ZSPARQLMethod):
     """Sparql"""
     implements(ISparql, IVersionEnhanced)
@@ -275,6 +274,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                                    "has_result": ""}}
         return cPickle.loads(field.data) if field and field.data else \
             empty_result
+
 
     security.declareProtected(view, 'setSparqlCacheResults')
     def setSparqlCacheResults(self, result):

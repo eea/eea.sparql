@@ -5,7 +5,6 @@ import DateTime
 from zope.component import queryUtility
 from Products.Archetypes.interfaces import IObjectInitializedEvent
 from Products.statusmessages.interfaces import IStatusMessage
-from eea.sparql.browser.sparql import Sparql
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 from eea.sparql.interfaces import ISparqlBookmarksFolder
 from eea.sparql.async import IAsyncService

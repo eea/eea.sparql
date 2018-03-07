@@ -49,4 +49,5 @@
          Products.Archetypes.interfaces.IObjectEditedEvent"
     handler=".events.sparql_modified"
     />
+
 </configure>

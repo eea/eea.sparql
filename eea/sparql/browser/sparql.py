@@ -117,7 +117,6 @@ class Sparql(BrowserView):
                 res = self.context.execute(**arg_values)
             except Exception, err:
                 import traceback
-                logger.info('Failed on test')
                 logger.exception(err)
                 error = traceback.format_exc()
             data = res.get('result')
@@ -134,7 +133,6 @@ class Sparql(BrowserView):
             'arg_spec': arg_spec,
             'error': error,
         }
-
         return options
 
     def json(self, **kwargs):
@@ -143,7 +141,6 @@ class Sparql(BrowserView):
 
         column_types = kwargs.get('column_types')
         annotations = kwargs.get('annotations')
-        logger.info('Attempting Data to json')
         try:
             return sortProperties(json.dumps(
                 sparql2json(data,
@@ -151,7 +148,6 @@ class Sparql(BrowserView):
                             annotations=annotations)
             ))
         except KeyError, err:
-            logger.info('Failed json conversion.')
             logger.exception(err)
 
     def sparql2exhibit(self):
@@ -174,8 +170,13 @@ class Sparql(BrowserView):
     def sparql2html(self):
         """ Download sparql results as HTML
         """
-        data = sparql2json(self.context.execute_query(
-            self.getArgumentMap()))
+        try:
+            data = sparql2json(self.context.execute_query(
+                self.getArgumentMap()))
+        except Exception, err:
+            data = {'properties':{}, 'items':{}}
+            logger.exception(err)
+
 
         result = []
         result.append(u"<style type='text/css'>")
@@ -210,8 +211,12 @@ class Sparql(BrowserView):
     def sparql2csv(self, dialect='excel'):
         """ Download sparql results as Comma Separated File
         """
-        data = sparql2json(self.context.execute_query(
-            self.getArgumentMap()))
+        try:
+            data = sparql2json(self.context.execute_query(
+                self.getArgumentMap()))
+        except Exception, err:
+            data = {'properties':{}, 'items':{}}
+            logger.exception(err)
 
         if dialect == 'excel':
             self.request.response.setHeader(

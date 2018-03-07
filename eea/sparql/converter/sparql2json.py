@@ -5,9 +5,7 @@ import sparql
 from zope.component import queryUtility
 from eea.sparql.converter import IGuessType
 from Products.ZSPARQLMethod import Method
-from plone import api
-import logging
-logger = logging.getLogger('eea.sparql')
+
 
 #define our own converters
 sparql_converters = Method.sparql_converters.copy()
@@ -196,6 +194,7 @@ def sparql2json(data, **kwargs):
                 }
 
         items.append(rowdata)
+
     return {'items': items, 'properties': properties}
 
 def sortProperties(strJson, indent=0):
