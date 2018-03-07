@@ -134,6 +134,7 @@ class Sparql(BrowserView):
             'arg_spec': arg_spec,
             'error': error,
         }
+
         return options
 
     def json(self, **kwargs):
@@ -173,19 +174,8 @@ class Sparql(BrowserView):
     def sparql2html(self):
         """ Download sparql results as HTML
         """
-        try:
-            data = sparql2json(self.context.execute_query(
-                self.getArgumentMap()))
-        except Exception, err:
-            data = {'properties':{}, 'items':{}}
-            logger.exception(err)
-            api.portal.show_message(
-                message="HTML conversion failed", request=self.request)
-            api.portal.show_message(
-                message="There is an error in the query, HTML/CSV/TSV " \
-                        "conversions not possible: %s" % err,
-                request=self.request)
-            return self.request.response.redirect(self.context.index_html())
+        data = sparql2json(self.context.execute_query(
+            self.getArgumentMap()))
 
         result = []
         result.append(u"<style type='text/css'>")
@@ -220,23 +210,8 @@ class Sparql(BrowserView):
     def sparql2csv(self, dialect='excel'):
         """ Download sparql results as Comma Separated File
         """
-        try:
-            data = sparql2json(self.context.execute_query(
-                self.getArgumentMap()))
-        except Exception, err:
-            logger.exception(err)
-            data = {'properties':{}, 'items':{}}
-            if dialect == 'excel':
-                api.portal.show_message(
-                    message="CSV conversion failed", request=self.request)
-            else:
-                api.portal.show_message(
-                    message="TSV conversion failed", request=self.request)
-            api.portal.show_message(
-                message="There is an error in the query, HTML/CSV/TSV " \
-                        "conversions not possible: %s" % err,
-                request=self.request)
-            return self.request.response.redirect(self.context.index_html())
+        data = sparql2json(self.context.execute_query(
+            self.getArgumentMap()))
 
         if dialect == 'excel':
             self.request.response.setHeader(
@@ -382,6 +357,14 @@ class Sparql(BrowserView):
         """
         return json.dumps([[x.title, x.absolute_url()]
                             for x in self.context.getBRefs() if x])
+
+    def getExportStatus(self):
+        """
+        """
+        if not getattr(self.context, 'exportWorks', True):
+            return False
+        return True
+
 
 class SparqlBookmarksFolder(Sparql):
     """SparqlBookmarksFolder view"""

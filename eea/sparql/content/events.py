@@ -52,39 +52,3 @@ def sparql_modified(obj, evt):
         'The data will be updated shortly, please check \
         <a href="%s">the info</a> below.' % anchor_url,
         type='info')
-
-
-from Products.ZSPARQLMethod.Method import QueryTimeout, run_with_timeout
-
-
-def check_exports(obj, evt):
-    """ Check the exports and display errors with portal message
-    """
-    print "ENTERING CHECKING"
-
-    x = obj.restrictedTraverse('@@view')
-    query = x.context.query
-    endpoint = x.context.endpoint_url
-
-    async_service = queryUtility(IAsyncService)
-    if async_service is None:
-        logger.warn(
-            "Can't schedule sparql update. plone.app.async NOT installed!")
-        return
-
-    obj.scheduled_at = DateTime.DateTime()
-
-    bookmarks_folder_added = False
-    if ISparqlBookmarksFolder.providedBy(obj) and \
-        IObjectInitializedEvent.providedBy(evt):
-        bookmarks_folder_added = True
-
-    async_queue = async_service.getQueues()['']
-    async_service.queueJobInQueue(
-        async_queue, ('sparql',),
-        x.sparql2html(),
-        obj,
-        scheduled_at=obj.scheduled_at,
-        bookmarks_folder_added=bookmarks_folder_added)
-    
-    print "FINISHED ASYNC"

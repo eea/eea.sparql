@@ -49,11 +49,4 @@
          Products.Archetypes.interfaces.IObjectEditedEvent"
     handler=".events.sparql_modified"
     />
-
-  <subscriber
-    for="eea.sparql.interfaces.ISparql
-         Products.Archetypes.interfaces.IObjectEditedEvent"
-    handler=".events.check_exports"
-    />
-
 </configure>
