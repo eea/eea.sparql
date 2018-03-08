@@ -170,6 +170,10 @@ class Sparql(BrowserView):
     def sparql2html(self):
         """ Download sparql results as HTML
         """
+        if not self.getExportStatus():
+            self.request.response.setStatus(500)
+            return "HTML conversion failed."
+
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
@@ -211,6 +215,10 @@ class Sparql(BrowserView):
     def sparql2csv(self, dialect='excel'):
         """ Download sparql results as Comma Separated File
         """
+        if not self.getExportStatus():
+            self.request.response.setStatus(500)
+            return 'Error: %s' % self.context.exportStatusMessage
+
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
@@ -367,8 +375,16 @@ class Sparql(BrowserView):
         """
         """
         if not getattr(self.context, 'exportWorks', True):
+            api.portal.show_message(
+                    message="There is an error, HTML/CSV/TSV conversions not " \
+                            "possible: %s" % self.context.exportStatusMessage,
+                    request=self.request, type='warning')
             return False
         return True
+
+    def __call__(self):
+        self.getExportStatus()
+        return self.index()
 
 
 class SparqlBookmarksFolder(Sparql):

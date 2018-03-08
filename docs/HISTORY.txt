@@ -1,8 +1,11 @@
 Changelog
 =========
 
-6.6.dev0 - (unreleased)
+6.6 - (2018-03-08)
 -----------------------
+* Change: Added loggers, a check regarding the status of the html/csv/tsv export
+  and also a warning message if the export fails
+  [petchesi-iulian refs #89670]
 
 6.5 - (2017-12-12)
 ------------------

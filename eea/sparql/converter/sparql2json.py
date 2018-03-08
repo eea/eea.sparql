@@ -6,7 +6,6 @@ from zope.component import queryUtility
 from eea.sparql.converter import IGuessType
 from Products.ZSPARQLMethod import Method
 
-
 #define our own converters
 sparql_converters = Method.sparql_converters.copy()
 sparql_converters[sparql.XSD_DECIMAL] = float
