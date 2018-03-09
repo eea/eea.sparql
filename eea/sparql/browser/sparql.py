@@ -172,7 +172,7 @@ class Sparql(BrowserView):
         """
         if not self.getExportStatus():
             self.request.response.setStatus(500)
-            return "HTML conversion failed."
+            return 'Error: %s' % self.context.exportStatusMessage
 
         try:
             data = sparql2json(self.context.execute_query(
