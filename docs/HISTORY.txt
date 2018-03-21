@@ -1,8 +1,10 @@
 Changelog
 =========
 
-6.6 - (2018-03-08)
+6.6 - (2018-03-19)
 -----------------------
+* Upgrade step: added upgrade steps in order to set the exportWorks attribute
+  for sparql objects
 * Change: Added loggers, a check regarding the status of the html/csv/tsv export
   and also a warning message if the export fails
   [petchesi-iulian refs #89670]
