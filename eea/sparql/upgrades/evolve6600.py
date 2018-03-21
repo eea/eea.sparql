@@ -1,4 +1,4 @@
-""" 
+""" Set exportWorks attribute for sparqls if they have a cached_result
 """
 
 import logging
