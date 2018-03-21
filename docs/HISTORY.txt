@@ -1,7 +1,7 @@
 Changelog
 =========
 
-6.6 - (2018-03-19)
+6.6 - (2018-03-21)
 -----------------------
 * Upgrade step: added upgrade steps in order to set the exportWorks attribute
   for sparql objects
