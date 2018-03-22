@@ -148,7 +148,7 @@ class Sparql(BrowserView):
                             annotations=annotations)
             ))
         except KeyError, err:
-            logger.exception(err)
+            logger.warn(err)
 
     def sparql2exhibit(self):
         """ Download sparql results as Exhibit JSON
