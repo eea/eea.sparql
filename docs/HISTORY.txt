@@ -1,7 +1,7 @@
 Changelog
 =========
 
-6.7.dev0 - (unreleased)
+6.7 - (2018-04-04)
 ------------------
 * Bug fix: regression fix for bug introduced in previest egg release.
   Removed call method for Sparql browserView as we have code
