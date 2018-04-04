@@ -12,8 +12,8 @@
                     exportStatus view/getExportStatus">
 
     <dl class="portalMessage warning" tal:condition="python:not exportStatus">
-        <dt>Warning</dt>
-        <div style="clear:both" tal:condition="view/context/exportStatusMessage">
+        <dt i18n:translate="">Warning</dt>
+        <div style="clear:both" tal:condition="view/context/exportStatusMessage" i18n:translate="">
             There is an error in the query, HTML/CSV/TSV conversions not possible:
             <span tal:content="view/context/exportStatusMessage">Error</span>
         </div>
