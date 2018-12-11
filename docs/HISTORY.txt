@@ -5,6 +5,8 @@ Changelog
 ---------------------
 * Change: updated URLs pointing to eea.europa.eu with https://
   [alecghica refs #95849]
+* Bug fix: fixed error display on running a SPARQL query
+  [alecghica refs #100666]
 
 6.8 - (2018-05-30)
 ---------------------
