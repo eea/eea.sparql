@@ -1,7 +1,7 @@
 Changelog
 =========
 
-7.1-dev0 - (unreleased)
+7.1 - (2019-08-01)
 ---------------------
 * Bug fix: fixed setup.py metadata
   [alecghica refs #108090]
