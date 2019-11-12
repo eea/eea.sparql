@@ -17,11 +17,11 @@
     provides="Products.GenericSetup.interfaces.EXTENSION"
     />
 
-    <genericsetup:registerProfile
-            name="upgrade36"
-            title="EEA Sparql upgrade profile for v3.6"
-            directory="profiles/upgrades/to_36"
-            description='EEA Sparql upgrade profile for v3.6'
-            provides="Products.GenericSetup.interfaces.EXTENSION" />
-
+    <!-- <genericsetup:registerProfile -->
+    <!--         name="upgrade36" -->
+    <!--         title="EEA Sparql upgrade profile for v3.6" -->
+    <!--         directory="profiles/upgrades/to_36" -->
+    <!--         description='EEA Sparql upgrade profile for v3.6' -->
+    <!--         provides="Products.GenericSetup.interfaces.EXTENSION" /> -->
+    <!--  -->
 </configure>

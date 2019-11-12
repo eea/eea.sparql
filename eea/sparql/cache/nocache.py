@@ -1,5 +1,7 @@
 """ No cache
 """
+
+
 def ramcache(*ar, **kw):
     """ RAM cache
     """
@@ -9,16 +11,20 @@ def ramcache(*ar, **kw):
         def replacement(*args, **kwargs):
             """ Replacement
             """
-            return method(*args, **kwargs)
-        return replacement
-    return decorator
 
+            return method(*args, **kwargs)
+
+        return replacement
+
+    return decorator
 
 
 def flush(*args, **kwargs):
     """ Flush cache
     """
+
     return
+
 
 flushRelatedItems = flush
 flushBackRefs = flush

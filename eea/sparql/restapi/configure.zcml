@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="eea.sparql">
+
+  <plone:service
+    method="GET"
+    for="eea.datatile.content.sparql.ISparqlQuery"
+    factory=".restapi.SparqlQueryGET"
+    permission="zope2.View"
+    name="@sparql-data"
+    />
+
+</configure>
