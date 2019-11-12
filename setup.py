@@ -1,7 +1,8 @@
 """ EEA Sparql Installer
 """
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 NAME = 'eea.sparql'
 PATH = NAME.split('.') + ['version.txt']
@@ -12,7 +13,7 @@ setup(name=NAME,
       description="Wrapper for Products.ZSPARQLMethod",
       long_description_content_type='text/x-rst',
       long_description=open("README.rst").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      open(os.path.join("docs", "HISTORY.txt")).read(),
       # https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
           "Framework :: Zope2",
@@ -41,8 +42,8 @@ setup(name=NAME,
           'pytz',
           'setuptools',
           'Products.ZSPARQLMethod',
-          'Products.DataGridField',
-          'eea.versions',
+          # 'Products.DataGridField',
+          # 'eea.versions',
           'plone.api',
       ],
       extras_require={

@@ -3,57 +3,56 @@
 
 import cPickle
 import datetime
-from random import random
 import logging
-import pytz
-from AccessControl import ClassSecurityInfo
-from AccessControl import SpecialUsers
-from AccessControl import getSecurityManager
-from AccessControl.Permissions import view
-from AccessControl.SecurityManagement import newSecurityManager
-from AccessControl.SecurityManagement import setSecurityManager
-from zope.interface import implements
+from random import random
+
+from ZODB.POSException import POSKeyError
 from zope.component import queryUtility
 from zope.event import notify
+from zope.interface import implements
+
 import DateTime
-from Products.ATContentTypes.content import schemata, base
-from Products.ATContentTypes.content.folder import ATFolder
-from Products.Archetypes import atapi
-from Products.Archetypes.atapi import IntegerField
-from Products.Archetypes.atapi import Schema
-from Products.Archetypes.atapi import SelectionWidget
-from Products.Archetypes.atapi import StringField, StringWidget, \
-                                        BooleanWidget, BooleanField
-from Products.Archetypes.atapi import TextField, TextAreaWidget
-from Products.CMFCore.utils import getToolByName
-from Products.CMFEditions.interfaces.IModifier import FileTooLargeToVersionError
-from Products.DataGridField import DataGridField, DataGridWidget
-from Products.DataGridField.Column import Column
-from Products.DataGridField.LinesColumn import LinesColumn
-from Products.ZSPARQLMethod.Method import ZSPARQLMethod, \
-                                        interpolate_query, \
-                                        run_with_timeout, \
-                                        parse_arg_spec, \
-                                        query_and_get_result, \
-                                        raw_query_and_get_result, \
-                                        map_arg_values, QueryTimeout
-from ZODB.POSException import POSKeyError
-from eea.sparql.cache import ramcache, cacheSparqlKey, cacheSparqlMethodKey
+import pytz
+from AccessControl import ClassSecurityInfo, SpecialUsers, getSecurityManager
+from AccessControl.Permissions import view
+from AccessControl.SecurityManagement import (newSecurityManager,
+                                              setSecurityManager)
+from eea.sparql.async import IAsyncService
+from eea.sparql.cache import cacheSparqlKey, cacheSparqlMethodKey, ramcache
 from eea.sparql.config import PROJECTNAME
+from eea.sparql.converter.sparql2json import sparql2json
 from eea.sparql.events import SparqlBookmarksFolderAdded
 from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 from eea.versions import versions
-from eea.versions.interfaces import IVersionEnhanced, IGetVersions
-from eea.sparql.async import IAsyncService
+from eea.versions.interfaces import IGetVersions, IVersionEnhanced
 from plone.app.blob.field import BlobField
-from eea.sparql.converter.sparql2json import sparql2json
+from Products.Archetypes import atapi
+from Products.Archetypes.atapi import (BooleanField, BooleanWidget,
+                                       IntegerField, Schema, SelectionWidget,
+                                       StringField, StringWidget,
+                                       TextAreaWidget, TextField)
+from Products.ATContentTypes.content import base, schemata
+from Products.ATContentTypes.content.folder import ATFolder
+from Products.CMFCore.utils import getToolByName
+from Products.CMFEditions.interfaces.IModifier import \
+    FileTooLargeToVersionError
+from Products.DataGridField import DataGridField, DataGridWidget
+from Products.DataGridField.Column import Column
+from Products.DataGridField.LinesColumn import LinesColumn
+from Products.ZSPARQLMethod.Method import (QueryTimeout, ZSPARQLMethod,
+                                           interpolate_query, map_arg_values,
+                                           parse_arg_spec,
+                                           query_and_get_result,
+                                           raw_query_and_get_result,
+                                           run_with_timeout)
+
 logger = logging.getLogger("eea.sparql")
 
 RESULTS_TYPES = {
-                 'xml' : "application/sparql-results+xml",
-                 'xmlschema' : "application/x-ms-access-export+xml",
-                 'json' : "application/sparql-results+json"
-                 }
+    'xml': "application/sparql-results+xml",
+    'xmlschema': "application/x-ms-access-export+xml",
+                 'json': "application/sparql-results+json"
+}
 
 SparqlBaseSchema = atapi.Schema((
     StringField(
@@ -98,7 +97,7 @@ SparqlBaseSchema = atapi.Schema((
                        'datagridwidget.js',),
             helper_css=('++resource++eea.sparql.datasource.css',
                         'datagridwidget.css')
-            ),
+        ),
         columns=("name", "query")
     ),
     TextField(
@@ -120,7 +119,7 @@ SparqlBaseSchema = atapi.Schema((
         widget=BooleanWidget(
             label='Static query',
             description='The data will be fetched only once',
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         default=False,
         required=0
@@ -129,7 +128,7 @@ SparqlBaseSchema = atapi.Schema((
         name='sparql_results',
         widget=TextAreaWidget(
             label="Results",
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         required=0,
 
@@ -138,7 +137,7 @@ SparqlBaseSchema = atapi.Schema((
         name='sparql_results_cached',
         widget=TextAreaWidget(
             label="Results",
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         required=0,
     ),
@@ -146,7 +145,7 @@ SparqlBaseSchema = atapi.Schema((
         name='sparql_results_cached_json',
         widget=TextAreaWidget(
             label="Results",
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         required=0,
     ),
@@ -154,7 +153,7 @@ SparqlBaseSchema = atapi.Schema((
         name='sparql_results_cached_xml',
         widget=TextAreaWidget(
             label="Results",
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         required=0,
     ),
@@ -162,7 +161,7 @@ SparqlBaseSchema = atapi.Schema((
         name='sparql_results_cached_xmlschema',
         widget=TextAreaWidget(
             label="Results",
-            visible={'edit':'invisible', 'view':'invisible'}
+            visible={'edit': 'invisible', 'view': 'invisible'}
         ),
         required=0,
     ),
@@ -178,7 +177,7 @@ SparqlBaseSchema = atapi.Schema((
 ))
 
 SparqlSchema = getattr(base.ATCTContent, 'schema', Schema(())).copy() + \
-        SparqlBaseSchema.copy()
+    SparqlBaseSchema.copy()
 
 SparqlSchema['title'].storage = atapi.AnnotationStorage()
 SparqlSchema['description'].storage = atapi.AnnotationStorage()
@@ -186,11 +185,12 @@ SparqlSchema['description'].storage = atapi.AnnotationStorage()
 schemata.finalizeATCTSchema(SparqlSchema, moveDiscussion=False)
 
 SparqlBookmarksFolderSchema = getattr(ATFolder, 'schema', Schema(())).copy() + \
-        SparqlBaseSchema.copy()
+    SparqlBaseSchema.copy()
 SparqlBookmarksFolderSchema['sparql_query'].widget.description = \
-        'The query should return label, bookmark url, query'
+    'The query should return label, bookmark url, query'
 SparqlBookmarksFolderSchema['sparql_static'].widget.visible['edit'] = \
-        'invisible'
+    'invisible'
+
 
 class Sparql(base.ATCTContent, ZSPARQLMethod):
     """Sparql"""
@@ -205,36 +205,45 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
     security = ClassSecurityInfo()
 
     security.declarePublic('index_html')
+
     def index_html(self, REQUEST=None, **kwargs):
         """index_html"""
-        return self.REQUEST.response.redirect(self.absolute_url()+"/@@view")
+
+        return self.REQUEST.response.redirect(self.absolute_url() + "/@@view")
 
     @property
     def query(self):
         """query"""
+
         return "\n".join(x for x in self.sparql_query().splitlines()
                          if not x.strip().startswith("#"))
 
     @property
     def query_with_comments(self):
         """query"""
+
         return self.sparql_query()
 
     security.declarePublic("execute_query")
+
     @ramcache(cacheSparqlKey, dependencies=['eea.sparql'])
     def execute_query(self, args=None):
         """execute query"""
         arg_string = ' '.join([arg['name'] for arg in self.arg_spec])
         arg_spec = parse_arg_spec(arg_string)
         arg_values = map_arg_values(arg_spec, args)[1]
+
         return self.execute(**self.map_arguments(**arg_values))
 
     security.declarePublic("getTimeout")
+
     def getTimeout(self):
         """timeout"""
+
         return str(self.timeout)
 
     security.declarePublic("setTimeout")
+
     def setTimeout(self, value):
         """timeout"""
         try:
@@ -262,21 +271,24 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             return empty_result
 
     security.declarePublic("getSparqlCacheResults")
+
     def getSparqlCacheResults(self):
         """
         :return: Sparql results
         :rtype: object
         """
+
         if getattr(self, 'sparql_results_are_cached', None):
             return self._getCachedSparqlResults()
         field = self.getSparql_results_cached()
         empty_result = {"result": {"rows": "", "var_names": "",
                                    "has_result": ""}}
+
         return cPickle.loads(field.data) if field and field.data else \
             empty_result
 
-
     security.declareProtected(view, 'setSparqlCacheResults')
+
     def setSparqlCacheResults(self, result):
         """ Set Sparql Cache results
         """
@@ -285,6 +297,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         self.setSparql_results_cached(cPickle.dumps(result))
 
     security.declareProtected(view, 'invalidateSparqlCacheResults')
+
     def invalidateSparqlCacheResults(self):
         """ Invalidate sparql results
         """
@@ -292,6 +305,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         self.setSparql_results_cached("")
 
     security.declareProtected(view, 'invalidateWorkingResult')
+
     def invalidateWorkingResult(self):
         """ invalidate working results"""
         self.setSparql_results("")
@@ -310,9 +324,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
                 msgtype="warn")
 
         async_service = queryUtility(IAsyncService)
+
         if async_service is None:
             logger.warn(
                 "Can't invalidateWorkingResult. plone.app.async NOT installed!")
+
             return
 
         self.scheduled_at = DateTime.DateTime()
@@ -330,9 +346,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         """
 
         async_service = queryUtility(IAsyncService)
+
         if async_service is None:
             logger.warn(
                 "Can't invalidateWorkingResult. plone.app.async NOT installed!")
+
             return
 
         async_queue = async_service.getQueues()['']
@@ -349,6 +367,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             )
 
     security.declareProtected(view, 'updateLastWorkingResults')
+
     def updateLastWorkingResults(self, **arg_values):
         """ update cached last working results of a query (json exhibit)
         """
@@ -381,10 +400,11 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         if force_save:
             self.setSparqlCacheResults(new_result)
             self._updateOtherCachedFormats(self.last_scheduled_at,
-                self.endpoint_url, cooked_query)
+                                           self.endpoint_url, cooked_query)
 
             new_sparql_results = []
             rows = new_result.get('result', {}).get('rows', {})
+
             if rows:
                 for row in rows:
                     for val in row:
@@ -393,6 +413,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             new_sparql_results_str = "".join(new_sparql_results) + "\n"
             self.setSparql_results(new_sparql_results_str)
             comment = "query has run - result changed"
+
         if self.portal_type in pr.getVersionableContentTypes():
             comment = comment.encode('utf')
             try:
@@ -412,6 +433,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
             self.setSparqlCacheResults(cached_result)
 
     security.declareProtected(view, 'updateExportStatus')
+
     def updateExportStatus(self, result):
         """ Update export status of HTML/CSV/TSV
         """
@@ -428,23 +450,28 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
         self.reindexObject()
 
     security.declareProtected(view, 'execute')
+
     def execute(self, **arg_values):
         """ override execute, if possible return the last working results
         """
         cached_result = self.getSparqlCacheResults()
+
         if not arg_values:
             return cached_result
 
         self.updateLastWorkingResults(**arg_values)
+
         return cached_result
 
     security.declareProtected(view, 'map_arguments')
+
     def map_arguments(self, **arg_values):
         """ overides map_arguments to match the name:type - query data model
         """
         arg_string = ' '.join([arg['name'] for arg in self.arg_spec])
         arg_spec = parse_arg_spec(arg_string)
         missing, arg_values = map_arg_values(arg_spec, arg_values)
+
         if missing:
             raise KeyError("Missing arguments: %r" % missing)
         else:
@@ -452,7 +479,7 @@ class Sparql(base.ATCTContent, ZSPARQLMethod):
 
 
 def async_updateOtherCachedFormats(obj, scheduled_at, endpoint, query,
-                                    _type, accept):
+                                   _type, accept):
     """ Async that updates json, xml, xmlschema exports
     """
 
@@ -469,6 +496,7 @@ def async_updateOtherCachedFormats(obj, scheduled_at, endpoint, query,
                 "Query received timeout: %s with %s\n %s \n %s",
                 "/".join(obj.getPhysicalPath()), _type, endpoint, query
             )
+
             return
 
         fieldName = "sparql_results_cached_" + _type
@@ -486,8 +514,8 @@ def async_updateOtherCachedFormats(obj, scheduled_at, endpoint, query,
 
 
 def async_updateLastWorkingResults(obj,
-                                scheduled_at,
-                                bookmarks_folder_added=False):
+                                   scheduled_at,
+                                   bookmarks_folder_added=False):
     """ Async update last working results
     """
 
@@ -496,8 +524,10 @@ def async_updateLastWorkingResults(obj,
         obj.updateLastWorkingResults()
 
         refresh_rate = getattr(obj, "refresh_rate", "Weekly")
+
         if refresh_rate == 'Once':
             cached_result = obj.getSparqlCacheResults()
+
             if not cached_result.get('result', {}).get('rows', {}):
                 refresh_rate = 'Hourly'
         else:
@@ -508,15 +538,20 @@ def async_updateLastWorkingResults(obj,
         before = datetime.datetime.now(pytz.UTC)
 
         delay = before + datetime.timedelta(hours=1)
+
         if refresh_rate == "Daily":
             delay = before + datetime.timedelta(days=1)
+
         if refresh_rate == "Weekly":
             delay = before + datetime.timedelta(weeks=1)
+
         if refresh_rate != "Once":
             async_service = queryUtility(IAsyncService)
+
             if async_service is None:
                 logger.warn("Can't async_updateLastWorkingResults. "
                             "plone.app.async NOT installed!")
+
                 return
 
             obj.scheduled_at = DateTime.DateTime()
@@ -529,6 +564,7 @@ def async_updateLastWorkingResults(obj,
                 scheduled_at=obj.scheduled_at,
                 bookmarks_folder_added=bookmarks_folder_added
             )
+
 
 def generateUniqueId(type_name):
     """ generateUniqueIds for sparqls
@@ -545,6 +581,7 @@ def generateUniqueId(type_name):
 
     return prefix + time + rand + suffix
 
+
 class SparqlBookmarksFolder(ATFolder, Sparql):
     """Sparql Bookmarks Folder"""
     implements(ISparqlBookmarksFolder)
@@ -558,17 +595,23 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
            2 - exists but changed"""
         found = False
         changed = True
+
         for sparql in self.values():
             if sparql.title == title.encode('utf8'):
                 latest_sparql = IGetVersions(sparql).latest_version()
                 found = True
+
                 if latest_sparql.query_with_comments == query:
                     changed = False
+
                 break
+
         if not found:
             return 0
+
         if not changed:
             return 1
+
         return 2
 
     def addOrUpdateQuery(self, title, endpoint, query):
@@ -580,13 +623,16 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
         ob = None
 
         changed = True
+
         for sparql in self.values():
             if sparql.title == title:
                 x1 = IGetVersions(sparql)
                 latest_sparql = x1.latest_version()
                 ob = latest_sparql
+
                 if latest_sparql.query_with_comments == query:
                     changed = False
+
                 break
 
         if not ob:
@@ -609,28 +655,34 @@ class SparqlBookmarksFolder(ATFolder, Sparql):
                 ob.invalidateWorkingResult()
 
         setSecurityManager(oldSecurityManager)
+
         return ob
 
     def findQuery(self, title):
         """Find the Query in the bookmarks folder
         """
         ob = None
+
         for sparql in self.values():
             if sparql.title == title:
                 latest_sparql = IGetVersions(sparql).latest_version()
                 ob = latest_sparql
+
                 break
+
         return ob
 
     def syncQueries(self):
         """sync all queries from bookmarks"""
         queries = self.execute().get('result', {}).get('rows', {})
+
         for query in queries:
             query_name = query[0].value
             query_sparql = query[2].value
             self.addOrUpdateQuery(query_name,
-                     self.endpoint_url,
-                     query_sparql)
+                                  self.endpoint_url,
+                                  query_sparql)
+
 
 atapi.registerType(Sparql, PROJECTNAME)
 atapi.registerType(SparqlBookmarksFolder, PROJECTNAME)
