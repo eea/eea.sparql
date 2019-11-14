@@ -1,12 +1,14 @@
 """ Convert sparql results to json
 """
 import json as simplejson
-import sparql
+
 from zope.component import queryUtility
+
+import sparql
 from eea.sparql.converter import IGuessType
 from Products.ZSPARQLMethod import Method
 
-#define our own converters
+# define our own converters
 sparql_converters = Method.sparql_converters.copy()
 sparql_converters[sparql.XSD_DECIMAL] = float
 sparql_converters[sparql.XSD_DATE] = str
@@ -28,8 +30,10 @@ propertytype_dict = {
     sparql.XSD_BOOLEAN: "boolean",
 }
 
+
 class MethodResult(Method.MethodResult):
     """Override MethodResult with our sparql_converters"""
+
     def __iter__(self):
         return (sparql.unpack_row(r, convert_type=sparql_converters)
                 for r in self.rdfterm_rows)
@@ -37,6 +41,7 @@ class MethodResult(Method.MethodResult):
     def __getitem__(self, n):
         return sparql.unpack_row(self.rdfterm_rows[n],
                                  convert_type=sparql_converters)
+
 
 def text_annotation(text, annotations=()):
     """ Extract text and annotation from given text based on
@@ -50,8 +55,10 @@ def text_annotation(text, annotations=()):
     (u'4438868', u'Eurostat estimate')
 
     """
+
     for annotation in annotations:
         name = annotation.get('name')
+
         if not name:
             continue
 
@@ -60,7 +67,9 @@ def text_annotation(text, annotations=()):
 
         if text.find(name) != -1:
             return text.replace(name, ''), annotation.get('title', name)
+
     return text, u''
+
 
 def sparql2json(data, **kwargs):
     """
@@ -110,6 +119,7 @@ def sparql2json(data, **kwargs):
     properties = {}
 
     columns = []
+
     for index, col in enumerate(cols):
         if col.lower().endswith(":label") or col.lower() == "label":
             columns.append('label')
@@ -122,12 +132,14 @@ def sparql2json(data, **kwargs):
 
     for index, row in enumerate(mr):
         rowdata = {}
+
         if not hasLabel:
             rowdata['label'] = index
 
         row = iter(row)
 
         idx = -1
+
         for order, key in enumerate(columns):
             key = key.encode('utf8')
             valueType = 'text'
@@ -141,8 +153,10 @@ def sparql2json(data, **kwargs):
                 item = u''
 
             idx += 1
+
             if isinstance(data_result['rows'][0][idx], sparql.Literal):
                 datatype = data_result['rows'][0][idx].datatype
+
                 if not datatype:
                     datatype = ''
                 valueType = propertytype_dict[datatype]
@@ -151,6 +165,7 @@ def sparql2json(data, **kwargs):
 
             # Annotations
             anno = annotations.get(key, None)
+
             if anno:
                 item, annotation = text_annotation(
                     item, anno.get('annotations', []))
@@ -160,8 +175,10 @@ def sparql2json(data, **kwargs):
 
             # Enforce column_types
             columnType = valueType
+
             if column_types:
                 newColumnType = column_types.get(key, columnType)
+
                 if newColumnType == columnType:
                     continue
 
@@ -180,8 +197,8 @@ def sparql2json(data, **kwargs):
 
             properties[key] = {
                 'columnType': columnType,
-                "valueType" : valueType,
-                "order" : idx
+                "valueType": valueType,
+                "order": idx
             }
 
             if anno:
@@ -196,6 +213,7 @@ def sparql2json(data, **kwargs):
 
     return {'items': items, 'properties': properties}
 
+
 def sortProperties(strJson, indent=0):
     """
     In the json string set the correct order of the columns
@@ -206,11 +224,13 @@ def sortProperties(strJson, indent=0):
         indentStr1 = ""
         indentStr2 = ""
         indentStr3 = ""
+
         if indent > 0:
             indentStr1 = "\n" + " " * indent
             indentStr2 = "\n" + " " * indent * 2
             indentStr3 = "\n" + " " * indent * 3
         newProperties = []
+
         for key, item in properties.items():
             prop = []
             prop.append(item['order'])
@@ -222,16 +242,19 @@ def sortProperties(strJson, indent=0):
         newJsonStr = simplejson.dumps(json, indent=indent)
         newPropStr = '"properties": '
         newPropStr += "{"
+
         for prop in newProperties:
             newPropStr += indentStr2 + '"' + prop[1] + '": '
             newPropStr += '{'
-            newPropStr += indentStr3 + '"valueType": "' + prop[2] +'", '
+            newPropStr += indentStr3 + '"valueType": "' + prop[2] + '", '
             newPropStr += indentStr3 + '"order": ' + str(prop[0]) + indentStr2
             newPropStr += '}, '
+
         if newProperties:
             newPropStr = newPropStr[:-2]
         newPropStr += indentStr1 + "}"
         newJsonStr = newJsonStr.replace('"properties": ""', newPropStr)
+
         return newJsonStr
     except Exception:
         return strJson

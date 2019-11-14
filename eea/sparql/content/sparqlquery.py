@@ -200,6 +200,8 @@ class SparqlQuery(Container, ZSPARQLMethod):
 
     security = ClassSecurityInfo()
 
+    arg_spec = None         # TODO: reimplement
+
     @security.protected('View')
     def index_html(self, REQUEST=None, **kwargs):
         """ Public method, needs docstring
@@ -211,7 +213,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
     def query(self):
         """query"""
 
-        return "\n".join(x for x in self.sparql_query().splitlines()
+        return "\n".join(x for x in self.sparql_query.splitlines()
                          if not x.strip().startswith("#"))
 
     @property
@@ -224,7 +226,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
     @security.public
     def execute_query(self, args=None):
         """execute query"""
-        arg_string = ' '.join([arg['name'] for arg in self.arg_spec])
+        arg_string = ' '.join([arg['name'] for arg in self.arg_spec or []])
         arg_spec = parse_arg_spec(arg_string)
         arg_values = map_arg_values(arg_spec, args)[1]
 
@@ -453,7 +455,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
     def map_arguments(self, **arg_values):
         """ overides map_arguments to match the name:type - query data model
         """
-        arg_string = ' '.join([arg['name'] for arg in self.arg_spec])
+        arg_string = ' '.join([arg['name'] for arg in (self.arg_spec or [])])
         arg_spec = parse_arg_spec(arg_string)
         missing, arg_values = map_arg_values(arg_spec, arg_values)
 

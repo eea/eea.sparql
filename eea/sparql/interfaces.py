@@ -22,10 +22,16 @@ class ISparqlQuery(model.Schema, ISparql):
         required=True
     )
 
-    endpoint = schema.URI(
+    endpoint_url = schema.URI(
         title=_(u'Sparql endpoint URL'),
         required=True,
         default="https://semantic.eea.europa.eu/sparql"
+    )
+
+    timeout = schema.Int(
+        title=_(u'Timeout'),
+        required=True,
+        default=10,
     )
 
 
