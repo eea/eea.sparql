@@ -6,8 +6,8 @@
 
   <plone:service
     method="GET"
-    for="eea.datatile.content.sparql.ISparqlQuery"
-    factory=".restapi.SparqlQueryGET"
+    for="eea.sparql.interfaces.ISparql"
+    factory=".api.SparqlQueryGET"
     permission="zope2.View"
     name="@sparql-data"
     />

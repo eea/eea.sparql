@@ -40,7 +40,7 @@
     -->
 
     <element value="plone.allowdiscussion"/>
-    <element value="plone.app.referenceablebehavior.referenceable.IReferenceable" />
+    <!-- <element value="plone.app.referenceablebehavior.referenceable.IReferenceable" /> -->
     <element value="plone.basic"/>
     <element value="plone.categorization"/>
     <element value="plone.excludefromnavigation"/>

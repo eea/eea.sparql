@@ -1,27 +1,16 @@
 """Definition of the Sparql content type
 """
 
-import cPickle
-import datetime
 import logging
 from random import random
 
-from ZODB.POSException import POSKeyError
-from zope.component import queryUtility
-from zope.event import notify
-from zope.interface import implementer, implements
-
-import DateTime
-import pytz
-from AccessControl import ClassSecurityInfo, SpecialUsers, getSecurityManager
-from AccessControl.Permissions import view
-from AccessControl.SecurityManagement import (newSecurityManager,
-                                              setSecurityManager)
-# from eea.sparql.async import IAsyncService
-from eea.sparql.cache import cacheSparqlKey, cacheSparqlMethodKey, ramcache
-from eea.sparql.converter.sparql2json import sparql2json
-from eea.sparql.interfaces import ISparqlQuery
-from plone.dexterity.content import Container
+# import pytz
+# , SpecialUsers, getSecurityManager
+# from AccessControl.SecurityManagement import (newSecurityManager,
+#                                               setSecurityManager)
+# from eea.sparql.converter.sparql2json import sparql2json
+# import cPickle
+# import datetime
 # from eea.sparql.events import SparqlBookmarksFolderAdded
 # from eea.sparql.interfaces import ISparql, ISparqlBookmarksFolder
 # from eea.versions import versions
@@ -34,12 +23,24 @@ from plone.dexterity.content import Container
 #                                        TextAreaWidget, TextField)
 # from Products.ATContentTypes.content import base, schemata
 # from Products.ATContentTypes.content.folder import ATFolder
-from Products.CMFCore.utils import getToolByName
-from Products.CMFEditions.interfaces.IModifier import \
-    FileTooLargeToVersionError
+# from Products.CMFCore.utils import getToolByName
+# from Products.CMFEditions.interfaces.IModifier import \
+#     FileTooLargeToVersionError
 # from Products.DataGridField import DataGridField, DataGridWidget
 # from Products.DataGridField.Column import Column
 # from Products.DataGridField.LinesColumn import LinesColumn
+# from eea.sparql.async import IAsyncService
+# from ZODB.POSException import POSKeyError
+# from zope.component import queryUtility
+# from zope.event import notify
+from zope.interface import implementer
+
+import DateTime
+from AccessControl import ClassSecurityInfo
+from AccessControl.Permissions import view
+from eea.sparql.cache import cacheSparqlKey, ramcache  # cacheSparqlMethodKey,
+from eea.sparql.interfaces import ISparqlQuery
+from plone.dexterity.content import Container
 from Products.ZSPARQLMethod.Method import (QueryTimeout, ZSPARQLMethod,
                                            interpolate_query, map_arg_values,
                                            parse_arg_spec,
@@ -219,8 +220,8 @@ class SparqlQuery(Container, ZSPARQLMethod):
 
         return self.sparql_query()
 
-    @security.public("execute_query")
     @ramcache(cacheSparqlKey, dependencies=['eea.sparql'])
+    @security.public
     def execute_query(self, args=None):
         """execute query"""
         arg_string = ' '.join([arg['name'] for arg in self.arg_spec])

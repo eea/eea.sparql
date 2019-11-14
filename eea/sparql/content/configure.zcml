@@ -4,12 +4,12 @@
   xmlns:zcml="http://namespaces.zope.org/zcml"
   i18n_domain="eea.sparql">
 
-  <class class=".sparql.Sparql">
-    <require
-      permission="zope2.View"
-      interface="..interfaces.ISparql"
-      />
-  </class>
+  <!-- <class class=".sparql.Sparql"> -->
+  <!--   <require -->
+  <!--     permission="zope2.View" -->
+  <!--     interface="..interfaces.ISparql" -->
+  <!--     /> -->
+  <!-- </class> -->
 
   <!-- <class class=".sparql.SparqlBookmarksFolder"> -->
   <!--   <require -->

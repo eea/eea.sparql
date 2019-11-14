@@ -3,12 +3,18 @@
 
 from zope import schema
 from zope.component.interfaces import IObjectEvent
+from zope.interface import Interface
 
 from eea.sparql import sparqlMessageFactory as _
 from plone.supermodel import model
 
 
-class ISparql(model.Schema):
+class ISparql(Interface):
+    """
+    """
+
+
+class ISparqlQuery(model.Schema, ISparql):
     """ISparql"""
 
     sparql_query = schema.Text(
