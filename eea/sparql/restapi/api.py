@@ -4,6 +4,8 @@ from plone.restapi.services import Service
 
 class SparqlQueryGET(Service):
     """ Get the available transactions
+    In order to test the service you need to make send a request to the url
+    https://github.com/plone/plone.rest#content-negotiation
     """
 
     def reply(self):

@@ -142,7 +142,8 @@ def sparql2json(data, **kwargs):
         idx = -1
 
         for order, key in enumerate(columns):
-            key = key.encode('utf8')
+            # key = key.encode('utf8')
+            # print(key)
             valueType = 'text'
 
             if key.endswith('__annotations__'):

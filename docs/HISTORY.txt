@@ -1,6 +1,13 @@
 Changelog
 =========
 
+8.0-dev0 - (unreleased)
+---------------------
+* Change: Remove key encoding at json conversion
+  [iulianpetchesi refs #111217]
+* Feature: Python3 compatibility
+  [iulianpetchesi refs #111217]
+
 7.2 - (2019-08-05)
 ---------------------
 * Change: Fix MANIFEST.in file [valentinab25]
