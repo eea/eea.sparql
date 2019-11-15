@@ -7,6 +7,7 @@ from zope.component import queryUtility
 import sparql
 from eea.sparql.converter import IGuessType
 from Products.ZSPARQLMethod import Method
+import six
 
 # define our own converters
 sparql_converters = Method.sparql_converters.copy()
@@ -62,7 +63,7 @@ def text_annotation(text, annotations=()):
         if not name:
             continue
 
-        if not isinstance(text, (str, unicode)):
+        if not isinstance(text, (str, six.text_type)):
             text = repr(text)
 
         if text.find(name) != -1:
@@ -148,7 +149,7 @@ def sparql2json(data, **kwargs):
                 continue
 
             try:
-                item = row.next()
+                item = next(row)
             except StopIteration:
                 item = u''
 

@@ -1,13 +1,14 @@
 """ Mock http server for testing sparql"""
 
+from __future__ import print_function
 from random import randint
-import BaseHTTPServer
+import six.moves.BaseHTTPServer
 import sys
 import os
 
 PORT = randint(17000, 19000)
 
-class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class Handler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
     """ Mock http request handler"""
 
     def do_POST(self):
@@ -21,7 +22,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         f = open(json_file, 'r')
         json_str = f.read()
         f.close()
-        print json_str
+        print(json_str)
         sys.stdout = stdout
 
     def do_GET(self):
@@ -29,5 +30,5 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         return self.do_POST()
 
 if __name__ == "__main__":
-    httpd = BaseHTTPServer.HTTPServer(("", PORT), Handler)
+    httpd = six.moves.BaseHTTPServer.HTTPServer(("", PORT), Handler)
     httpd.serve_forever()

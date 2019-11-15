@@ -13,6 +13,7 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from eea.sparql.content.sparql import async_updateLastWorkingResults
 from eea.sparql.async import IAsyncService
+from six.moves import zip
 logger = logging.getLogger("eea.sparql")
 
 
@@ -117,7 +118,7 @@ class ScheduleStatus(BrowserView):
                 for argn, argv in zip(job_argnames, job.args):
                     if argn != 'func':
                         continue
-                    elif argv.func_name == 'async_updateLastWorkingResults':
+                    elif argv.__name__ == 'async_updateLastWorkingResults':
                         yield job
 
     def updUnqSparqls(self):
@@ -176,7 +177,7 @@ class ScheduleStatus(BrowserView):
                                         spq_ob,
                                         scheduled_at=spq_ob.scheduled_at,
                                         bookmarks_folder_added=False)
-            except Exception, e:
+            except Exception as e:
                 logger.error("Got exception %s when restarting sparql %s",
                                       e, spq_brain.getPath())
 
@@ -259,7 +260,7 @@ class ScheduleStatus(BrowserView):
             logger.info('Sending e-mail to %s', email_to)
             mailhost.send(mfrom=email_from, mto=email_to,
                 subject=subject, messageText=body)
-        except Exception, e:
+        except Exception as e:
             logger.error("Got exception %s for %s", e, email_to)
             return_msg += "Error raised while attempting to send e-mail. "
         else:

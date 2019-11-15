@@ -44,7 +44,7 @@ def set_sparql_export_attribute(context):
                 setattr(obj, 'exportWorks', True)
                 setattr(obj, 'exportStatusMessage', '')
                 sparql2json(cached_result)
-            except Exception, err:
+            except Exception as err:
                 logger.info('Export status failed on: %s', brain.getPath())
                 setattr(obj, 'exportWorks', False)
                 setattr(obj, 'exportStatusMessage', err)

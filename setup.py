@@ -45,6 +45,7 @@ setup(name=NAME,
           # 'Products.DataGridField',
           # 'eea.versions',
           'plone.api',
+          'six',
       ],
       extras_require={
           'test': [

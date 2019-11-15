@@ -10,7 +10,7 @@ from eea.sparql.tests.base import FUNCTIONAL_TESTING
 
 try:
     from eea.app.visualization import interfaces as VISUALIZATION
-except ImportError, err:
+except ImportError as err:
     VISUALIZATION = None
     logger = logging.getLogger('eea.sparql')
     logger.debug(err)

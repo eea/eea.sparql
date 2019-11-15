@@ -1,7 +1,7 @@
 """ Base module for sparql tests
 """
 
-import BaseHTTPServer
+import six.moves.BaseHTTPServer
 import threading
 
 import eea.sparql
@@ -48,7 +48,7 @@ class SparqlFunctionalTestCase(ptc.FunctionalTestCase):
         """ Start the mock http server on port 8888
             Since we make only one request we can use handle_request
         """
-        self.server = BaseHTTPServer.HTTPServer(("", PORT), Handler)
+        self.server = six.moves.BaseHTTPServer.HTTPServer(("", PORT), Handler)
         self.server_thread = threading.Thread(target=self.server.handle_request)
         self.server_thread.start()
 

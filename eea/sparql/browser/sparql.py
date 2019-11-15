@@ -5,8 +5,8 @@ import contextlib
 import csv
 import json
 import logging
-import urllib
-import urllib2
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 from time import time
 import re
 import DateTime
@@ -23,6 +23,7 @@ from Products.ZSPARQLMethod.Method import run_with_timeout
 from eea.sparql.converter.sparql2json import sortProperties
 from eea.sparql.converter.sparql2json import sparql2json
 from eea.versions.interfaces import IGetVersions
+import six
 
 logger = logging.getLogger('eea.sparql')
 
@@ -53,7 +54,7 @@ class Sparql(BrowserView):
             arg = k['name'].split(':')[0]
             val = self.request.get(arg, None)
             if val:
-                value += '%s=%s&' % (arg, urllib.quote(val))
+                value += '%s=%s&' % (arg, six.moves.urllib.parse.quote(val))
         return value[:-1]
 
     def getQueryMap(self):
@@ -117,7 +118,7 @@ class Sparql(BrowserView):
             res, error = {}, None
             try:
                 res = self.context.execute(**arg_values)
-            except Exception, err:
+            except Exception as err:
                 import traceback
                 logger.exception(err)
                 error = traceback.format_exc()
@@ -149,7 +150,7 @@ class Sparql(BrowserView):
                             column_types=column_types,
                             annotations=annotations)
             ))
-        except KeyError, err:
+        except KeyError as err:
             logger.warn(err)
 
     def sparql2exhibit(self):
@@ -158,7 +159,7 @@ class Sparql(BrowserView):
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception, err:
+        except Exception as err:
             logger.exception(err)
             data = {'properties':{}, 'items':{}}
 
@@ -179,7 +180,7 @@ class Sparql(BrowserView):
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception, err:
+        except Exception as err:
             data = {'properties':{}, 'items':{}}
             logger.exception(err)
 
@@ -209,7 +210,7 @@ class Sparql(BrowserView):
         for row in data['items']:
             result.append(u"\t<tr>")
             for col in properties:
-                result.append(u"\t\t<td>" + unicode(row[col[1]]) + "</td>")
+                result.append(u"\t\t<td>" + six.text_type(row[col[1]]) + "</td>")
             result.append(u"\t</tr>")
         result.append(u"</table>")
         return '\n'.join(result)
@@ -224,7 +225,7 @@ class Sparql(BrowserView):
         try:
             data = sparql2json(self.context.execute_query(
                 self.getArgumentMap()))
-        except Exception, err:
+        except Exception as err:
             data = {'properties':{}, 'items':{}}
             logger.exception(err)
 
@@ -266,7 +267,7 @@ class Sparql(BrowserView):
         for item in data['items']:
             row = []
             for col in headers:
-                row.append(unicode(item[col]).encode('utf'))
+                row.append(six.text_type(item[col]).encode('utf'))
             writter.writerow(row)
 
         return ''
@@ -341,16 +342,16 @@ class Sparql(BrowserView):
         url_protocol = endpoint.split('://')
         if len(url_protocol) < 2:
             endpoint = "http://" + endpoint
-        query = 'query=%s' % urllib.quote(self.context.query)
-        request = urllib2.Request(endpoint, query, headers or {})
+        query = 'query=%s' % six.moves.urllib.parse.quote(self.context.query)
+        request = six.moves.urllib.request.Request(endpoint, query, headers or {})
         results = ""
         timeout = max(getattr(self.context, 'timeout', 10), 10)
         try:
-            with contextlib.closing(urllib2.urlopen(
+            with contextlib.closing(six.moves.urllib.request.urlopen(
                 request, timeout=timeout)) as conn:
                 for data in conn:
                     self.request.response.write(data)
-        except Exception, err:
+        except Exception as err:
             logger.exception(err)
         return results
 
@@ -451,7 +452,7 @@ class SparqlBookmarkFoldersSync(BrowserView):
         for brain in brains:
             try:
                 brain.getObject().syncQueries()
-            except Exception, err:
+            except Exception as err:
                 logger.exception(err)
         return "Sync done"
 
@@ -512,7 +513,7 @@ class QuickPreview(BrowserView):
             for value in row:
                 try:
                     result.append(u"<td> %s </td>" %cgi.escape(value.n3()))
-                except Exception, err:
+                except Exception as err:
                     logger.debug(err)
                     result.append(u"<td> %s </td>" %value)
             result.append(u"</tr>")
