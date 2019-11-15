@@ -1,5 +1,9 @@
+import logging
+
 from eea.sparql.converter.sparql2json import sparql2json
 from plone.restapi.services import Service
+
+logger = logging.getLogger('eea.sparql.restapi')
 
 
 class SparqlQueryGET(Service):
@@ -10,6 +14,12 @@ class SparqlQueryGET(Service):
 
     def reply(self):
         res = self.context.execute_query()
+
+        if 'exception' in res:
+            logger.warning('Could not retrieve data from sparql endpoint')
+
+            return {}
+
         json = sparql2json(res)
 
         return json
