@@ -35,7 +35,7 @@ class ISparqlQuery(model.Schema, ISparql):
     )
 
 
-class ISparqlBookmarksFolder(ISparql):
+class ISparqlBookmarksFolder(ISparqlQuery):
     """ISparqlBookmarksFolder"""
 
 
