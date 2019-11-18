@@ -9,7 +9,7 @@
   <!-- <include file="skins.zcml" /> -->
 
   <!-- <include package=".async" /> -->
-  <!-- <include package=".browser" /> -->
+  <include package=".browser" />
   <include package=".cache" />
   <include package=".content" />
   <!-- <include package=".data" /> -->
