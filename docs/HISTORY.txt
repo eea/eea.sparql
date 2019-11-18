@@ -3,6 +3,8 @@ Changelog
 
 8.0-dev0 - (unreleased)
 ---------------------
+* Change: Make SparqlBookmarksFolder a dexterity object
+  [iulianpetchesi refs #111217]
 * Change: Remove key encoding at json conversion
   [iulianpetchesi refs #111217]
 * Feature: Python3 compatibility
