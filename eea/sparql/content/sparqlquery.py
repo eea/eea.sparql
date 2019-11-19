@@ -199,8 +199,8 @@ class SparqlQuery(Container, ZSPARQLMethod):
     """ Sparql query implementaiton in dexterity"""
 
     security = ClassSecurityInfo()
+    # arg_spec = None         # TODO: reimplement
 
-    arg_spec = None         # TODO: reimplement
 
     @security.protected('View')
     def index_html(self, REQUEST=None, **kwargs):
