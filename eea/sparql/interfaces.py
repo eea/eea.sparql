@@ -9,10 +9,12 @@ from collective.z3cform.datagridfield import DictRow
 from eea.sparql import sparqlMessageFactory as _
 
 from plone.autoform import directives
+from plone.namedfile.field import NamedBlobFile
 from plone.supermodel import model
 from plone.supermodel.directives import fieldset, primary
 
-from z3c.form.interfaces import IEditForm
+from z3c.form.interfaces import IAddForm, IEditForm
+
 
 class IArgumentsSchema(Interface):
     """ Arguments table schema (arg_spec)
@@ -65,7 +67,41 @@ class ISparqlQuery(model.Schema, ISparql):
         required=False
     )
 
+    # directives.mode(sparql_results_cached='hidden')
+    sparql_results_cached = NamedBlobFile(
+        title=_(u'Results'),
+        required=False
+    )
 
+    sparql_results_cached_json = NamedBlobFile(
+        title=_(u'Results'),
+        required=False
+    )
+
+    sparql_results_cached_xml = NamedBlobFile(
+        title=_(u'Results'),
+        required=False
+    )
+
+    sparql_results_cached_xmlschema = NamedBlobFile(
+        title=_(u'Results'),
+        required=False
+    )
+
+    refresh_rate = schema.Choice(
+        title=_(u'Refresh the results'), required=True,
+        values=[u'Once', u'Hourly', u'Daily', u'Weekly'],
+        default=_(u'Weekly')
+    )
+
+    directives.omitted(IEditForm, 'sparql_results_cached')
+    directives.omitted(IAddForm, 'sparql_results_cached')
+    directives.omitted(IEditForm, 'sparql_results_cached_json')
+    directives.omitted(IAddForm, 'sparql_results_cached_json')
+    directives.omitted(IEditForm, 'sparql_results_cached_xml')
+    directives.omitted(IAddForm, 'sparql_results_cached_xml')
+    directives.omitted(IEditForm, 'sparql_results_cached_xmlschema')
+    directives.omitted(IAddForm, 'sparql_results_cached_xmlschema')
 
 
 class ISparqlBookmarksFolder(ISparqlQuery):
