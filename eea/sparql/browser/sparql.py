@@ -22,7 +22,7 @@ from Products.ZSPARQLMethod.Method import query_and_get_result
 from Products.ZSPARQLMethod.Method import run_with_timeout
 from eea.sparql.converter.sparql2json import sortProperties
 from eea.sparql.converter.sparql2json import sparql2json
-from eea.versions.interfaces import IGetVersions
+# from eea.versions.interfaces import IGetVersions
 import six
 
 logger = logging.getLogger('eea.sparql')
@@ -424,6 +424,10 @@ class SparqlBookmarksFolder(Sparql):
     def getVisualizations(self, title):
         """ Get Daviz Visualizations for sparql object
         """
+        return []
+        # import pdb; pdb.set_trace()
+        # TODO: eea.versions is not ported yet
+
         ob = None
         for sparql in self.context.values():
             if sparql.title == title:

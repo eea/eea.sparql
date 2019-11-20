@@ -168,3 +168,8 @@ p.sparql-has-result .boolean {
         width: 66%;
     }
 }
+
+/* TO BE ADDED TO CSS, DISPLAYS DATAGRIDFIELD BUTTONS*/
+.auto-append > .datagridwidget-manipulator.insert-row a {
+    display: inline;
+}

@@ -220,7 +220,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
     def query_with_comments(self):
         """query"""
 
-        return self.sparql_query()
+        return self.sparql_query
 
     @ramcache(cacheSparqlKey, dependencies=['eea.sparql'])
     @security.public

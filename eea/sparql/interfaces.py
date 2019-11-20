@@ -7,18 +7,19 @@ from zope.interface import Interface
 
 from collective.z3cform.datagridfield import DictRow
 from eea.sparql import sparqlMessageFactory as _
-from plone.supermodel import model
 
 from plone.autoform import directives
-from plone.supermodel.directives import fieldset
-from plone.supermodel.directives import primary
+from plone.supermodel import model
+from plone.supermodel.directives import fieldset, primary
+
+from z3c.form.interfaces import IEditForm
 
 class IArgumentsSchema(Interface):
     """ Arguments table schema (arg_spec)
     """
 
-    arg_name = schema.TextLine(title=u"Argument name", required=False)
-    arg_query = schema.TextLine(title=u"Argument query", required=False)
+    name = schema.TextLine(title=u"Argument name", required=False)
+    query = schema.TextLine(title=u"Argument query", required=False)
 
 
 class ISparql(Interface):
@@ -47,9 +48,23 @@ class ISparqlQuery(model.Schema, ISparql):
     )
 
     directives.widget(arg_spec='collective.z3cform.datagridfield.DataGridFieldFactory')
-    primary('arg_spec')
-    arg_spec = schema.List(title=u"Arguments", required=False,
-                value_type=DictRow(title=u"tablerow", schema=IArgumentsSchema))
+    # primary('arg_spec')
+    arg_spec = schema.List(title=_(u'Arguments'), required=False,
+                value_type=DictRow(title=u'tablerow', schema=IArgumentsSchema))
+
+    directives.mode(sparql_static='hidden')
+    # directives.mode(IEditForm, sparql_static='input') # Display Field on edit
+    sparql_static = schema.Bool(
+        title=_(u'Static query'), required=False, default=False,
+        description="The data will be fetched only once"
+    )
+
+    directives.mode(sparql_results='hidden')
+    sparql_results = schema.Text(
+        title=_(u'Results'),
+        required=False
+    )
+
 
 
 
