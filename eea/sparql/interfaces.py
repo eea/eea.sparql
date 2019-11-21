@@ -51,8 +51,12 @@ class ISparqlQuery(model.Schema, ISparql):
 
     directives.widget(arg_spec='collective.z3cform.datagridfield.DataGridFieldFactory')
     # primary('arg_spec')
-    arg_spec = schema.List(title=_(u'Arguments'), required=False,
-                value_type=DictRow(title=u'tablerow', schema=IArgumentsSchema))
+    arg_spec = schema.List(
+                title=_(u'Arguments'), required=False,
+                default=[], missing_value=[],
+                value_type=DictRow(
+                    title=u'tablerow', schema=IArgumentsSchema)
+                )
 
     directives.mode(sparql_static='hidden')
     # directives.mode(IEditForm, sparql_static='input') # Display Field on edit

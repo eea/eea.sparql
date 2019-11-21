@@ -13,7 +13,10 @@ from eea.sparql.content.sparqlquery import generateUniqueId, SparqlQuery
 from eea.sparql.interfaces import ISparqlBookmarksFolder
 # from Products.CMFCore.utils import getToolByName
 from plone.dexterity.content import Container
+from plone.i18n.normalizer.interfaces import IIDNormalizer
+from zope.component import getUtility
 from zope.interface import implementer
+
 
 logger = logging.getLogger("eea.sparql")
 
@@ -33,8 +36,10 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
         changed = True
 
         for sparql in self.values():
-            import pdb; pdb.set_trace()
-            if sparql.title == title.encode('utf8'):
+            if sparql.title == title:
+                found = True
+                break
+                # import pdb; pdb.set_trace()
                 latest_sparql = IGetVersions(sparql).latest_version()
                 found = True
 
@@ -63,6 +68,9 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
 
         for sparql in self.values():
             if sparql.title == title:
+                ob = sparql
+                break
+                # import pdb; pdb.set_trace() # IGetVersions not available yet
                 x1 = IGetVersions(sparql)
                 latest_sparql = x1.latest_version()
                 ob = latest_sparql
@@ -73,23 +81,31 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
                 break
 
         if not ob:
-            _id = generateUniqueId("Sparql")
-            _id = self.invokeFactory(type_name="Sparql", id=_id)
+            _id = generateUniqueId("SparqlQuery")
+            _id = self.invokeFactory(type_name="SparqlQuery", id=_id)
             ob = self[_id]
+
+            setattr(ob, 'endpoint_url', endpoint)
+            setattr(ob, 'sparql_query', query)
+            # edit no longer accepting other params, useful for reindex
             ob.edit(
                 title=title,
-                endpoint_url=endpoint,
-                sparql_query=query,
             )
-            ob._renameAfterCreation(check_auto_id=True)
-            ob.invalidateWorkingResult()
+
+            # generate new id
+            normalizer = getUtility(IIDNormalizer)
+            new_id = normalizer.normalize(title)
+
+            ob.aq_parent.manage_renameObject(_id, new_id)
+            # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
         else:
             if changed:
+                pass # TODO: versions not ported yet
                 ob = versions.create_version(ob)
-                ob.edit(
-                    sparql_query=query,
-                )
-                ob.invalidateWorkingResult()
+                setattr(ob, 'sparql_query', query)
+                if getattr(ob, 'reindexObject', None) is not None:
+                    ob.reindexObject()
+                # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
 
         setSecurityManager(oldSecurityManager)
 
@@ -102,6 +118,9 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
 
         for sparql in self.values():
             if sparql.title == title:
+                ob = sparql
+                break # IGetVersions not available yet
+                # import pdb; pdb.set_trace()
                 latest_sparql = IGetVersions(sparql).latest_version()
                 ob = latest_sparql
 

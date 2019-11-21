@@ -55,7 +55,7 @@
             </tal:block>
           </td>
           <td tal:condition="python: not isAnon" >
-            <form action="addOrUpdateQueryFromBookmark" method="POST">
+            <form action="/addOrUpdateQueryFromBookmark" method="POST" tal:attributes="action string:${here/absolute_url}/addOrUpdateQueryFromBookmark">
                 <input type="hidden" name="title" tal:attributes="value python:row['name']"/>
                 <input type="hidden" name="query" tal:attributes="value python:row['sparql']"/>
                 <input type="submit" tal:attributes="value python:{0:'Add',1:'Go To',2:'Update'}.get(row['status'])" class="context"/>
