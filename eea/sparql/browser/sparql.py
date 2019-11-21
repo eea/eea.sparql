@@ -376,7 +376,7 @@ class Sparql(BrowserView):
         """ Items what are back related to this query
         """
         return json.dumps([[x.title, x.absolute_url()]
-                            for x in self.context.getBRefs('relatesTo') if x])
+                            for x in self.context.relatedItems if x])
 
     def getExportStatus(self):
         """
@@ -416,7 +416,6 @@ class SparqlBookmarksFolder(Sparql):
 
     def addOrUpdateQuery(self):
         """Add or Update the Current Query"""
-        # import pdb; pdb.set_trace()
         ob = self.context.addOrUpdateQuery(self.request['title'],
                  self.context.endpoint_url,
                  self.request['query'])
@@ -430,19 +429,20 @@ class SparqlBookmarksFolder(Sparql):
     def getVisualizations(self, title):
         """ Get Daviz Visualizations for sparql object
         """
-        return []
-        # import pdb; pdb.set_trace()
-        # TODO: eea.versions is not ported yet
-
         ob = None
         for sparql in self.context.values():
             if sparql.title == title:
+                ob = sparql
+                break
+                # import pdb; pdb.set_trace()
+                # TODO: eea.versions is not ported yet
                 ob = IGetVersions(sparql).latest_version()
                 break
         if not ob:
             return []
 
-        return ob.getBRefs('relatesTo')
+        return [viz.to_object for viz in ob.relatedItems]
+        # return ob.relatedItems
 
     def createVisualization(self):
         """ Create visualization with datasource
