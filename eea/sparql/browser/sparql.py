@@ -7,9 +7,11 @@ import json
 import logging
 import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
-from time import time
 import re
 import DateTime
+from io import StringIO
+from time import time
+
 
 from plone import api
 from Products.CMFCore.utils import getToolByName
@@ -241,10 +243,10 @@ class Sparql(BrowserView):
             self.request.response.setHeader(
                 'Content-Disposition',
                 'attachment; filename="%s.tsv"' % self.context.getId())
+        output = StringIO()
+        writter = csv.writer(output, dialect=dialect)
 
-        writter = csv.writer(self.request.response, dialect=dialect)
         row = []
-
         properties = []
         def_order = 0
         for key, item in data['properties'].items():
@@ -263,14 +265,16 @@ class Sparql(BrowserView):
         for col in headers:
             header = '%s:%s' % (col, data['properties'][col]['valueType'])
             row.append(header)
+
         writter.writerow(row)
         for item in data['items']:
             row = []
             for col in headers:
-                row.append(six.text_type(item[col]).encode('utf'))
+                row.append(six.text_type(item[col]))
             writter.writerow(row)
 
-        return ''
+        output.seek(0)
+        return output.read()
 
 
     def sparqlTriggerAsync(self, cached_data):
@@ -395,6 +399,7 @@ class SparqlBookmarksFolder(Sparql):
         bookmarks['error'] = results['error']
         bookmarks['duration'] = results['duration']
         query_endpoint = self.context.endpoint_url
+
         if results_data is not None:
             queries = results_data.get('rows', [])
             for query in queries:
@@ -411,6 +416,7 @@ class SparqlBookmarksFolder(Sparql):
 
     def addOrUpdateQuery(self):
         """Add or Update the Current Query"""
+        # import pdb; pdb.set_trace()
         ob = self.context.addOrUpdateQuery(self.request['title'],
                  self.context.endpoint_url,
                  self.request['query'])
