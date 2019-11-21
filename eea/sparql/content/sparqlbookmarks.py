@@ -39,7 +39,7 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             if sparql.title == title:
                 found = True
                 break
-                # import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace() #TODO: IGetVersions not ported
                 latest_sparql = IGetVersions(sparql).latest_version()
                 found = True
 
@@ -100,8 +100,8 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
         else:
             if changed:
-                pass # TODO: versions not ported yet
-                ob = versions.create_version(ob)
+                # TODO: versions not ported yet
+                # ob = versions.create_version(ob)
                 setattr(ob, 'sparql_query', query)
                 if getattr(ob, 'reindexObject', None) is not None:
                     ob.reindexObject()
