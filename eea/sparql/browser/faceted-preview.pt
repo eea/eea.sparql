@@ -29,4 +29,8 @@
     <span class="photoAlbumEntryDescription" tal:content="description">Description</span>
 
   </a>
+  <script type="text/javascript" src="++resource++eea.sparql.datasource.js"></script>
+  <script type="text/javascript" src="++resource++eea.sparql.js"></script>
+  <link rel="stylesheet" href="++resource++eea.sparql.css" type="text/css" />
+  <link rel="stylesheet" href="++resource++eea.sparql.datasource.css" type="text/css" />
 </div>

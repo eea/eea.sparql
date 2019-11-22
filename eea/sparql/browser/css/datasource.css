@@ -42,9 +42,9 @@
   border-width: 0px 20px 20px;
 }
 
-td.datagridwidget-cell{
-    display:inline;
-}
+/*td.datagridwidget-cell{*/
+/*    display:inline;*/
+/*}*/
 
 #datagridwidget-tbody-arg_spec .datagridwidget-column-1.datagridwidget-cell:before{
     content: "Argument name";
@@ -60,10 +60,10 @@ td.datagridwidget-cell{
     display:none;
 }
 
-td.datagridwidget-manipulator {
-    display:inline !important;
-    float:left !important;
-}
+/*td.datagridwidget-manipulator {*/
+/*    display:inline !important;*/
+/*    float:left !important;*/
+/*}*/
 
 .datagridwidget-table-edit {
     width:500px !important;

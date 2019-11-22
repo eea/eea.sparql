@@ -19,12 +19,12 @@
         template="test_query.pt"
         />
 
-    <!--<browser:page-->
-    <!--    for="eea.sparql.interfaces.ISparql"-->
-    <!--    name="faceted-preview-item"-->
-    <!--    template="faceted-preview.pt"-->
-    <!--    permission="zope.Public"-->
-    <!--    />-->
+    <browser:page
+        for="eea.sparql.interfaces.ISparql"
+        name="faceted-preview-item"
+        template="faceted-preview.pt"
+        permission="zope.Public"
+        />
 
     <browser:page
         for="eea.sparql.interfaces.ISparql"

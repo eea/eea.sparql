@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<registry>
+  <records prefix="plone.resources/sparql-view"
+           interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="css">
+      <element>++resource++eea.sparql.css</element>
+    </value>
+    <value key="js">++resource++eea.sparql.js</value>
+  </records>
+
+  <records prefix="plone.resources/sparql-datasource-view"
+           interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="css">
+      <element>++resource++eea.sparql.datasource.css</element>
+    </value>
+    <value key="js">++resource++eea.sparql.datasource.js</value>
+  </records>
+
+  <records prefix="plone.resources/sparql-edit"
+           interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="css">
+      <element>++resource++eea.sparql.css</element>
+    </value>
+    <value key="js">++resource++eea.sparql.js</value>
+  </records>
+
+  <records prefix="plone.resources/sparql-datasource-edit"
+           interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="css">
+      <element>++resource++eea.sparql.datasource.css</element>
+    </value>
+    <value key="js">++resource++eea.sparql.datasource.js</value>
+  </records>
+
+  <records prefix="plone.bundles/sparql-view-bundle"
+           interface='Products.CMFPlone.interfaces.IBundleRegistry'>
+    <value key="resources">
+      <element>sparql-view</element>
+      <element>sparql-datasource-view</element>
+    </value>
+    <value key="depends"></value>
+    <value key="csscompilation">++plone++static/sparql-view.min.css</value>
+    <value key="jscompilation">++plone++static/sparql-view.min.js</value>
+    <value key="compile">False</value>
+    <value key="enabled">True</value>
+    <value key="expression">python:getattr(object, 'portal_type', None) in ['SparqlQuery', 'SparqlBookmarksFolder'] and 'edit' not in request.URL0</value>
+  </records>
+
+  <records prefix="plone.bundles/sparql-edit-bundle"
+           interface='Products.CMFPlone.interfaces.IBundleRegistry'>
+    <value key="resources">
+      <element>sparql-edit</element>
+      <element>sparql-datasource-edit</element>
+    </value>
+    <value key="depends"></value>
+    <value key="csscompilation">++plone++static/sparql-edit.min.css</value>
+    <value key="jscompilation">++plone++static/sparql-edit.min.js</value>
+    <value key="compile">False</value>
+    <value key="enabled">True</value>
+    <value key="expression">python:getattr(object, 'portal_type', None) in ['SparqlQuery', 'SparqlBookmarksFolder'] and 'edit' in request.URL0</value>
+  </records>
+</registry>
