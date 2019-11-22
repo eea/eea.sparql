@@ -42,13 +42,16 @@ from eea.sparql.cache import cacheSparqlKey, ramcache, cacheSparqlMethodKey
 from eea.sparql.converter.sparql2json import sparql2json
 from eea.sparql.interfaces import ISparqlQuery
 from plone import namedfile
-from plone.dexterity.content import Container
+from plone.dexterity.content import Container, DexterityContent
+from plone.folder.ordered import CMFOrderedBTreeFolderBase
 from Products.ZSPARQLMethod.Method import (QueryTimeout, ZSPARQLMethod,
                                            interpolate_query, map_arg_values,
                                            parse_arg_spec,
                                            query_and_get_result,
                                            raw_query_and_get_result,
                                            run_with_timeout)
+
+
 
 logger = logging.getLogger("eea.sparql")
 
@@ -201,11 +204,16 @@ class SparqlQuery(Container, ZSPARQLMethod):
     """ Sparql query implementaiton in dexterity"""
 
     security = ClassSecurityInfo()
-    # arg_spec = None         # TODO: reimplement
-    sparql_results_cached = namedfile.NamedBlobFile()
-    sparql_results_cached_json = namedfile.NamedBlobFile()
-    sparql_results_cached_xml = namedfile.NamedBlobFile()
-    sparql_results_cached_xmlschema = namedfile.NamedBlobFile()
+
+    def __init__(self, id=None, **kwargs):
+        """ Initialize cache fields """
+        CMFOrderedBTreeFolderBase.__init__(self, id)
+        DexterityContent.__init__(self, id, **kwargs)
+
+        self.sparql_results_cached = namedfile.NamedBlobFile()
+        self.sparql_results_cached_json = namedfile.NamedBlobFile()
+        self.sparql_results_cached_xml = namedfile.NamedBlobFile()
+        self.sparql_results_cached_xmlschema = namedfile.NamedBlobFile()
 
     @security.protected('View')
     def index_html(self, REQUEST=None, **kwargs):
@@ -257,11 +265,11 @@ class SparqlQuery(Container, ZSPARQLMethod):
         :return: Cached Sparql results
         :rtype: object
         """
+        # NOT TESTED
         empty_result = {"result": {"rows": "", "var_names": "",
                                     "has_result": ""}}
         try:
-            import pdb; pdb.set_trace()
-            data = self.getSparql_results_cached().data
+            data = self.sparql_results_cached.data
         # 69841 take into account missing blobs
         except POSKeyError:
             return empty_result
@@ -277,7 +285,6 @@ class SparqlQuery(Container, ZSPARQLMethod):
         :return: Sparql results
         :rtype: object
         """
-
         if getattr(self, 'sparql_results_are_cached', None):
             return self._getCachedSparqlResults()
 
