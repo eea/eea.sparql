@@ -146,6 +146,7 @@ class Sparql(BrowserView):
 
         column_types = kwargs.get('column_types')
         annotations = kwargs.get('annotations')
+
         try:
             return sortProperties(json.dumps(
                 sparql2json(data,
@@ -153,6 +154,7 @@ class Sparql(BrowserView):
                             annotations=annotations)
             ))
         except KeyError as err:
+            logger.warn("JSON EXPORT ERROR")
             logger.warn(err)
 
     def sparql2exhibit(self):

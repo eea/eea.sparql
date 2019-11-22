@@ -8,7 +8,6 @@ from random import random
 # , SpecialUsers, getSecurityManager
 # from AccessControl.SecurityManagement import (newSecurityManager,
 #                                               setSecurityManager)
-# from eea.sparql.converter.sparql2json import sparql2json
 # import cPickle
 # import datetime
 # from eea.sparql.events import SparqlBookmarksFolderAdded
@@ -30,16 +29,19 @@ from random import random
 # from Products.DataGridField.Column import Column
 # from Products.DataGridField.LinesColumn import LinesColumn
 # from eea.sparql.async import IAsyncService
-# from ZODB.POSException import POSKeyError
 # from zope.component import queryUtility
 # from zope.event import notify
 from zope.interface import implementer
+from ZODB.POSException import POSKeyError
 
 import DateTime
+import pickle as cPickle
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view
-from eea.sparql.cache import cacheSparqlKey, ramcache  # cacheSparqlMethodKey,
+from eea.sparql.cache import cacheSparqlKey, ramcache, cacheSparqlMethodKey
+from eea.sparql.converter.sparql2json import sparql2json
 from eea.sparql.interfaces import ISparqlQuery
+from plone import namedfile
 from plone.dexterity.content import Container
 from Products.ZSPARQLMethod.Method import (QueryTimeout, ZSPARQLMethod,
                                            interpolate_query, map_arg_values,
@@ -200,7 +202,10 @@ class SparqlQuery(Container, ZSPARQLMethod):
 
     security = ClassSecurityInfo()
     # arg_spec = None         # TODO: reimplement
-
+    sparql_results_cached = namedfile.NamedBlobFile()
+    sparql_results_cached_json = namedfile.NamedBlobFile()
+    sparql_results_cached_xml = namedfile.NamedBlobFile()
+    sparql_results_cached_xmlschema = namedfile.NamedBlobFile()
 
     @security.protected('View')
     def index_html(self, REQUEST=None, **kwargs):
@@ -245,55 +250,80 @@ class SparqlQuery(Container, ZSPARQLMethod):
     #         self.timeout = int(value)
     #     except Exception:
     #         self.timeout = 10
-    #
-    # @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
-    # def _getCachedSparqlResults(self):
-    #     """
-    #     :return: Cached Sparql results
-    #     :rtype: object
-    #     """
-    #     empty_result = {"result": {"rows": "", "var_names": "",
-    #                                "has_result": ""}}
-    #     try:
-    #         data = self.getSparql_results_cached().data
-    #     # 69841 take into account missing blobs
-    #     except POSKeyError:
-    #         return empty_result
-    #     # 69841 make sure the data returned can be pickled
-    #     try:
-    #         return cPickle.loads(data)
-    #     except cPickle.UnpicklingError:
-    #         return empty_result
-    # @security.public("getSparqlCacheResults")
-    # def getSparqlCacheResults(self):
-    #     """
-    #     :return: Sparql results
-    #     :rtype: object
-    #     """
-    #
-    #     if getattr(self, 'sparql_results_are_cached', None):
-    #         return self._getCachedSparqlResults()
-    #     field = self.getSparql_results_cached()
-    #     empty_result = {"result": {"rows": "", "var_names": "",
-    #                                "has_result": ""}}
-    #
-    #     return cPickle.loads(field.data) if field and field.data else \
-    #         empty_result
-    #
-    # @security.protected(view)
-    # def setSparqlCacheResults(self, result):
-    #     """ Set Sparql Cache results
-    #     """
-    #     self.updateExportStatus(result)
-    #     self.sparql_results_are_cached = True
-    #     self.setSparql_results_cached(cPickle.dumps(result))
 
-    # @security.protected(view)
-    # def invalidateSparqlCacheResults(self):
-    #     """ Invalidate sparql results
-    #     """
-    #     self.sparql_results_are_cached = False
-    #     self.setSparql_results_cached("")
+    @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
+    def _getCachedSparqlResults(self):
+        """
+        :return: Cached Sparql results
+        :rtype: object
+        """
+        empty_result = {"result": {"rows": "", "var_names": "",
+                                    "has_result": ""}}
+        try:
+            import pdb; pdb.set_trace()
+            data = self.getSparql_results_cached().data
+        # 69841 take into account missing blobs
+        except POSKeyError:
+            return empty_result
+        # 69841 make sure the data returned can be pickled
+        try:
+            return cPickle.loads(data)
+        except cPickle.UnpicklingError:
+            return empty_result
+
+    @security.public
+    def getSparqlCacheResults(self):
+        """
+        :return: Sparql results
+        :rtype: object
+        """
+
+        if getattr(self, 'sparql_results_are_cached', None):
+            return self._getCachedSparqlResults()
+
+        field = self.sparql_results_cached
+        empty_result = {"result": {"rows": "", "var_names": "",
+                                    "has_result": ""}}
+
+        if field.getSize() == 0:
+            return empty_result
+
+        return cPickle.loads(field.data) if field and field.data else \
+            empty_result
+
+    @security.protected('View')
+    def setSparqlCacheResults(self, result):
+        """ Set Sparql Cache results
+        """
+        # TODO: TEST
+        self.updateExportStatus(result)
+        self.sparql_results_are_cached = True
+        self.sparql_results_cached._setData(cPickle.dumps(result))
+
+    @security.protected('View')
+    def invalidateSparqlCacheResults(self):
+        """ Invalidate sparql results
+        """
+        self.sparql_results_are_cached = False
+        self.sparql_results_cached._setData(b"")
+
+    @security.protected('View')
+    def updateExportStatus(self, result):
+        """ Update export status of HTML/CSV/TSV
+        """
+        # TODO: TEST
+        setattr(self, 'exportWorks', True)
+        try:
+            setattr(self, 'exportWorks', True)
+            setattr(self, 'exportStatusMessage', '')
+            sparql2json(result)
+        except Exception as err:
+            logger.exception(err)
+            setattr(self, 'exportWorks', False)
+            setattr(self, 'exportStatusMessage', err)
+        self._p_changed = True
+        self.reindexObject()
+
 
     # @security.protected(view)
     # def invalidateWorkingResult(self):
@@ -420,22 +450,6 @@ class SparqlQuery(Container, ZSPARQLMethod):
     #     if new_result.get('exception', None):
     #         cached_result['exception'] = new_result['exception']
     #         self.setSparqlCacheResults(cached_result)
-
-    # @security.declareProtected(view)
-    # def updateExportStatus(self, result):
-    #     """ Update export status of HTML/CSV/TSV
-    #     """
-    #     setattr(self, 'exportWorks', True)
-    #     try:
-    #         setattr(self, 'exportWorks', True)
-    #         setattr(self, 'exportStatusMessage', '')
-    #         sparql2json(result)
-    #     except Exception, err:
-    #         logger.exception(err)
-    #         setattr(self, 'exportWorks', False)
-    #         setattr(self, 'exportStatusMessage', err)
-    #     self._p_changed = True
-    #     self.reindexObject()
 
     # TIBI: commented this method to use the default in Products.ZSPARQLMethod
     # @security.protected(view)

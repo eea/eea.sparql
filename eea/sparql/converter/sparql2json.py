@@ -161,7 +161,10 @@ def sparql2json(data, **kwargs):
 
                 if not datatype:
                     datatype = ''
-                valueType = propertytype_dict[datatype]
+                try:
+                    valueType = propertytype_dict[datatype]
+                except:
+                    import pdb; pdb.set_trace()
             elif isinstance(data_result['rows'][0][idx], sparql.IRI):
                 valueType = 'url'
 
