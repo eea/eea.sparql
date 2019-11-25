@@ -6,7 +6,7 @@
 
   <include file="profiles.zcml" />
   <include file="permissions.zcml" />
-  <!-- <include file="skins.zcml" /> -->
+  <include file="skins.zcml" />
 
   <!-- <include package=".async" /> -->
   <include package=".browser" />
