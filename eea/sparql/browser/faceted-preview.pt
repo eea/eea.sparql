@@ -1,4 +1,7 @@
 <div class="photoAlbumEntry eea-sparql-item">
+  <script type="text/javascript" src="++plone++static/components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="++resource++eea.sparql.js"></script>
+  <script type="text/javascript" src="++resource++eea.sparql.datasource.js"></script>
   <a tal:define="
       description context/Description|string:;
       title context/pretty_title_or_id|string:;
@@ -24,13 +27,10 @@
         tal:content="string:
         jQuery('a[href=${jq_sparql_url}]').EEASparqlPreview();
     "></script>
-
     <span class="photoAlbumEntryTitle" tal:content="context/pretty_title_or_id|string:">Title</span>
     <span class="photoAlbumEntryDescription" tal:content="description">Description</span>
-
   </a>
-  <script type="text/javascript" src="++resource++eea.sparql.datasource.js"></script>
-  <script type="text/javascript" src="++resource++eea.sparql.js"></script>
+
   <link rel="stylesheet" href="++resource++eea.sparql.css" type="text/css" />
   <link rel="stylesheet" href="++resource++eea.sparql.datasource.css" type="text/css" />
 </div>

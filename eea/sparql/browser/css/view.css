@@ -170,6 +170,10 @@ p.sparql-has-result .boolean {
 }
 
 /* TO BE ADDED TO CSS, DISPLAYS DATAGRIDFIELD BUTTONS*/
-.datagridwidget-table-view .auto-append > .datagridwidget-manipulator.insert-row a {
+.datagridwidget-body .auto-append > .datagridwidget-manipulator.insert-row a {
+    display: inline;
+}
+
+.datagridwidget-body .auto-append > .datagridwidget-manipulator.delete-row a {
     display: inline;
 }
