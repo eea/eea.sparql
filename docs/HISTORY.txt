@@ -3,6 +3,9 @@ Changelog
 
 7.3-dev0 - (unreleased)
 ---------------------------
+* Bug fix: fixed height of sparql results when results have large
+  text results
+  [ichim-david  refs #111794]
 
 7.2 - (2019-08-05)
 ---------------------
