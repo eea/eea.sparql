@@ -1,11 +1,11 @@
 """ Sparql interfaces module
 """
 
-from zope import schema
+from zope import schema, component
 from zope.component.interfaces import IObjectEvent
 from zope.interface import Interface
 
-from collective.z3cform.datagridfield import DictRow
+from collective.z3cform.datagridfield import DictRow, DataGridFieldFactory
 from eea.sparql import sparqlMessageFactory as _
 
 from plone.autoform import directives
@@ -13,6 +13,7 @@ from plone.namedfile.field import NamedBlobFile
 from plone.supermodel import model
 from plone.supermodel.directives import fieldset, primary
 
+from z3c.form import form, widget, field
 from z3c.form.interfaces import IAddForm, IEditForm
 
 
@@ -50,7 +51,6 @@ class ISparqlQuery(model.Schema, ISparql):
     )
 
     directives.widget(arg_spec='collective.z3cform.datagridfield.DataGridFieldFactory')
-    # primary('arg_spec')
     arg_spec = schema.List(
                 title=_(u'Arguments'), required=False,
                 default=[], missing_value=[],
