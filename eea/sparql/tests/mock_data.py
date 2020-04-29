@@ -1,7 +1,7 @@
 """ Mock data for testing
 """
 
-from eea.sparql.content.sparql import Sparql
+from eea.sparql.content.sparqlquery import SparqlQuery
 from eea.sparql.tests.base import PORT
 from Products.ZSPARQLMethod.Method import parse_arg_spec, \
                                             map_arg_values, \
@@ -16,7 +16,7 @@ def mock_sparql_query():
 def loadSparql():
     """ Load data from mock http
     """
-    sparql = Sparql(0)
+    sparql = SparqlQuery()
     sparql.endpoint_url = "http://localhost:"+str(PORT)+"/sparql-results.xml"
     sparql.sparql_query = mock_sparql_query
     sparql.timeout = None
@@ -26,7 +26,7 @@ def loadSparql():
     arg_spec = parse_arg_spec(sparql.arg_spec)
     arg_values = map_arg_values(arg_spec, args)[1]
 
-    cooked_query = interpolate_query(sparql.query, arg_values)
+    cooked_query = interpolate_query(sparql.sparql_query(), arg_values)
 
     query_args = (sparql.endpoint_url, cooked_query)
 

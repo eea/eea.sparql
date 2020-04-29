@@ -50,10 +50,10 @@ def text_annotation(text, annotations=()):
 
     >>> from eea.sparql.converter.sparql2json import text_annotation
     >>> text_annotation('4438868(s)', annotations=[
-    ...   {'name': u'(s)', 'title': u'Eurostat estimate'},
-    ...   {'name': u':', 'title': u'Not available'},
+    ...   {'name': '(s)', 'title': 'Eurostat estimate'},
+    ...   {'name': ':', 'title': 'Not available'},
     ... ])
-    (u'4438868', u'Eurostat estimate')
+    ('4438868', 'Eurostat estimate')
 
     """
 
@@ -69,7 +69,7 @@ def text_annotation(text, annotations=()):
         if text.find(name) != -1:
             return text.replace(name, ''), annotation.get('title', name)
 
-    return text, u''
+    return text, ''
 
 
 def sparql2json(data, **kwargs):

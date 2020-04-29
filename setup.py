@@ -51,6 +51,10 @@ setup(name=NAME,
       extras_require={
           'test': [
               'plone.app.testing',
+              'Products.Archetypes',
+              'plone.restapi',
+
+
           ]
       },
       entry_points="""

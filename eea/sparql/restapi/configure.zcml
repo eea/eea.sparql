@@ -4,6 +4,8 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="eea.sparql">
 
+  <include package="plone.rest" file="meta.zcml"/>
+
   <plone:service
     method="GET"
     for="eea.sparql.interfaces.ISparql"

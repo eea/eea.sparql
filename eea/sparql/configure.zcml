@@ -3,7 +3,7 @@
   xmlns:browser="http://namespaces.zope.org/browser"
   i18n_domain="eea">
 
-  <!-- <includeDependencies package="." /> -->
+  <includeDependencies package="." />
 
   <include file="profiles.zcml" />
   <include file="permissions.zcml" />

@@ -19,10 +19,12 @@ class Handler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
         stdout = sys.stdout
         sys.stdout = self.wfile
         json_file = os.path.join(os.path.dirname(__file__), "sparql.xml")
-        f = open(json_file, 'r')
+        f = open(json_file, 'rb')
         json_str = f.read()
         f.close()
-        print(json_str)
+        # import pdb; pdb.set_trace()
+        # sys.stdout.write(json_str)
+        print(json_str, file=sys.stdout)
         sys.stdout = stdout
 
     def do_GET(self):

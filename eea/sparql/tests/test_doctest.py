@@ -14,17 +14,6 @@ from plone.testing import layered
 def test_suite():
     """ Suite
     """
-    # return unittest.TestSuite([
-
-    #     ztc.ZopeDocFileSuite(
-    #         'converter/sparql2json.py', package='eea.sparql',
-    #         test_class=base.SparqlFunctionalTestCaseLayer,
-    #         optionflags=doctest.REPORT_ONLY_FIRST_FAILURE |
-    #             doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS),
-
-
-    #     ])
-
     suite = unittest.TestSuite()
     suite.addTests([
         layered(
