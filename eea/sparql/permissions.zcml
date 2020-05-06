@@ -1,5 +1,6 @@
 <configure
   xmlns="http://namespaces.zope.org/zope"
+  xmlns:zcml="http://namespaces.zope.org/zcml"
   i18n_domain="eea">
 
   <permission
@@ -12,6 +13,20 @@
     id="eea.sparql.bookmarksfolder.add"
     title="eea.sparql: Add Sparql Bookmarks Folder"
     description="Add Sparql Bookmarks Folder"
+    />
+
+  <permission
+    zcml:condition="installed Products.Archetypes"
+    id="eea.sparql.archetypes.add"
+    title="eea.sparql: Add Sparql Archetypes"
+    description="Add Sparql Archetypes"
+    />
+
+  <permission
+    zcml:condition="installed Products.Archetypes"
+    id="eea.sparql.archetypes.bookmarksfolder.add"
+    title="eea.sparql: Add Sparql Archetypes Bookmarks Folder"
+    description="Add Sparql Archetypes Bookmarks Folder"
     />
 
 </configure>

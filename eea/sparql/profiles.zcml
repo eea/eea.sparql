@@ -6,7 +6,7 @@
   xmlns:i18n="http://namespaces.zope.org/i18n"
   i18n_domain="eea">
 
-  <!-- <five:registerPackage package="." initialize=".initialize" /> -->
+  <five:registerPackage package="." initialize=".initialize" />
   <i18n:registerTranslations directory="locales" />
 
     <!-- Register the installation GenericSetup extension profile -->
@@ -23,6 +23,15 @@
     name="plone5"
     directory="profiles/plone5"
     title="EEA Sparql Plone5"
+    description="Extension profile for EEA Sparql Plone5."
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+  <genericsetup:registerProfile
+    zcml:condition="installed Products.Archetypes"
+    name="archetypes"
+    directory="profiles/archetypes"
+    title="EEA Sparql Plone5 Archetype content types"
     description="Extension profile for EEA Sparql Plone5."
     provides="Products.GenericSetup.interfaces.EXTENSION"
     />

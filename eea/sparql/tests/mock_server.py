@@ -23,8 +23,8 @@ class Handler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
         json_str = f.read()
         f.close()
         # import pdb; pdb.set_trace()
-        # sys.stdout.write(json_str)
-        print(json_str, file=sys.stdout)
+        sys.stdout.write(json_str)
+        # print(json_str, file=sys.stdout)
         sys.stdout = stdout
 
     def do_GET(self):

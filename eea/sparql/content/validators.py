@@ -7,7 +7,7 @@ from Products.ZSPARQLMethod.Method import query_and_get_result
 from zope.annotation import IAnnotations
 from zope.interface import implements
 
-sparql = __import__('sparql')
+sparql = __import__('SparqlArchetypes')
 
 
 class SparqlQueryValidator(object):

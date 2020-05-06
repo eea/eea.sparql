@@ -115,3 +115,16 @@ class ISparqlBookmarksFolder(ISparqlQuery):
 class ISparqlBookmarksFolderAdded(IObjectEvent):
     """An event signalling that the sparql bookmarks folder was added
     """
+
+
+class ISparqlArchetypes(Interface):
+    """ISparql"""
+
+
+class ISparqlBookmarksFolderArchetypes(ISparqlArchetypes):
+    """ISparqlBookmarksFolder"""
+
+
+class ISparqlBookmarksFolderAddedArchetypes(IObjectEvent):
+    """An event signalling that the sparql bookmarks folder was added
+    """

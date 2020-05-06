@@ -53,8 +53,10 @@ setup(name=NAME,
               'plone.app.testing',
               'Products.Archetypes',
               'plone.restapi',
-
-
+          ],
+          'archetypes': [
+              'Products.Archetypes',
+              'Products.DataGridField',
           ]
       },
       entry_points="""
