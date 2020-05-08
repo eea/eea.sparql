@@ -51,7 +51,6 @@ setup(name=NAME,
       extras_require={
           'test': [
               'plone.app.testing',
-              'Products.Archetypes',
               'plone.restapi',
           ],
           'archetypes': [

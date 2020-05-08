@@ -230,18 +230,18 @@ class SparqlArchetypes(base.ATCTContent, ZSPARQLMethod):
         arg_values = map_arg_values(arg_spec, args)[1]
         return self.execute(**self.map_arguments(**arg_values))
 
-    # security.declarePublic("getTimeout")
-    # def getTimeout(self):
-    #     """timeout"""
-    #     return str(self.timeout)
+    security.declarePublic("getTimeout")
+    def getTimeout(self):
+        """timeout"""
+        return str(self.timeout)
 
-    # security.declarePublic("setTimeout")
-    # def setTimeout(self, value):
-    #     """timeout"""
-    #     try:
-    #         self.timeout = int(value)
-    #     except Exception:
-    #         self.timeout = 10
+    security.declarePublic("setTimeout")
+    def setTimeout(self, value):
+        """timeout"""
+        try:
+            self.timeout = int(value)
+        except Exception:
+            self.timeout = 10
 
     @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
     def _getCachedSparqlResults(self):
@@ -329,6 +329,14 @@ class SparqlArchetypes(base.ATCTContent, ZSPARQLMethod):
     def _updateOtherCachedFormats(self, scheduled_at, endpoint, query):
         """ Run and store queries in sparql endpoints for xml, xmlschema, json
         """
+        # async_service = queryUtility(IAsyncService)	
+        # if async_service is None:	
+        #     logger.warn(	
+        #         "Can't invalidateWorkingResult. plone.app.async NOT installed!")	
+        #     return	
+        # async_queue = async_service.getQueues()['']	
+        # delay = datetime.datetime.now(pytz.UTC)
+
         for _type, accept in RESULTS_TYPES.items():
             updateOtherCachedFormats(self, scheduled_at, endpoint, query, _type, accept)
             # delay = delay + datetime.timedelta(minutes=5)
@@ -385,11 +393,20 @@ class SparqlArchetypes(base.ATCTContent, ZSPARQLMethod):
             new_sparql_results_str = "".join(new_sparql_results) + "\n"
             self.setSparql_results(new_sparql_results_str)
             comment = "query has run - result changed"
-        commands = view.getCommandSet('plone')
-        commands.issuePortalMessage(
-            """Changes Saved. Versioning for this file
-              has been disabled because it is too large.""",
-            msgtype="warn")
+
+        # if self.portal_type in pr.getVersionableContentTypes():	
+        #     comment = comment.encode('utf')	
+        #     try:	
+        #         oldSecurityManager = getSecurityManager()	
+        #         newSecurityManager(None, SpecialUsers.system)	
+        #         pr.save(obj=self, comment=comment)	
+        #         setSecurityManager(oldSecurityManager)	
+        #     except FileTooLargeToVersionError:
+        #         commands = view.getCommandSet('plone')
+        #         commands.issuePortalMessage(
+        #             """Changes Saved. Versioning for this file
+        #               has been disabled because it is too large.""",
+        #             msgtype="warn")
 
         if new_result.get('exception', None):
             cached_result['exception'] = new_result['exception']

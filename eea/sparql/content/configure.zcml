@@ -12,18 +12,18 @@
         handler=".events.bookmarksfolder_added"
     />
 
-  <!-- <subscriber -->
-  <!--   for="eea.sparql.interfaces.ISparql -->
-  <!--        Products.Archetypes.interfaces.IObjectInitializedEvent" -->
-  <!--   handler=".events.sparql_added_or_modified" -->
-  <!--   /> -->
-  <!--  -->
-  <!-- <subscriber -->
-  <!--   for="eea.sparql.interfaces.ISparql -->
-  <!--        Products.Archetypes.interfaces.IObjectEditedEvent" -->
-  <!--   handler=".events.sparql_added_or_modified" -->
-  <!--   /> -->
-  <!--  -->
+    <subscriber
+        for="eea.sparql.interfaces.ISparql
+             zope.lifecycleevent.IObjectCreatedEvent"
+        handler=".events.sparql_added_or_modified"
+    />
+
+    <subscriber
+        for="eea.sparql.interfaces.ISparql
+             zope.lifecycleevent.IObjectModifiedEvent"
+        handler=".events.sparql_added_or_modified"
+    />
+
     <subscriber
         for="eea.sparql.interfaces.ISparql
              zope.lifecycleevent.IObjectModifiedEvent"

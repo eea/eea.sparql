@@ -1,14 +1,13 @@
 """ Handle events
 """
+import DateTime
 import logging
 
 from zope.component import queryUtility
+from zope.lifecycleevent import IObjectCreatedEvent
 
-import DateTime
-# from eea.sparql.async import IAsyncService
-# from eea.sparql.content.sparql import async_updateLastWorkingResults
+from eea.sparql.content.sparqlquery import updateLastWorkingResults
 from eea.sparql.interfaces import ISparqlBookmarksFolder
-# from Products.Archetypes.interfaces import IObjectInitializedEvent
 from Products.statusmessages.interfaces import IStatusMessage
 
 logger = logging.getLogger("eea.sparql")
@@ -50,31 +49,12 @@ def sparql_archetypes_modified(obj, evt):
         type='info')
 
 
-
-
-
 def sparql_added_or_modified(obj, evt):
     """Update last working results when sparql is added or modified"""
-    # async_service = queryUtility(IAsyncService)
-
-    # if async_service is None:
-    #     logger.warn(
-    #         "Can't schedule sparql update. plone.app.async NOT installed!")
-
-    #     return
-
-    # obj.scheduled_at = DateTime.DateTime()
-
+    obj.scheduled_at = DateTime.DateTime()
     bookmarks_folder_added = False
-
     if ISparqlBookmarksFolder.providedBy(obj) and \
-            IObjectInitializedEvent.providedBy(evt):
+            IObjectCreatedEvent.providedBy(evt):
         bookmarks_folder_added = True
 
-    # async_queue = async_service.getQueues()['']
-    # async_service.queueJobInQueue(
-    #     async_queue, ('sparql',),
-    #     async_updateLastWorkingResults,
-    #     obj,
-    #     scheduled_at=obj.scheduled_at,
-    #     bookmarks_folder_added=bookmarks_folder_added)
+    updateLastWorkingResults(obj, obj.scheduled_at, bookmarks_folder_added)

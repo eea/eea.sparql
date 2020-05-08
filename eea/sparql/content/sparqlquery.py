@@ -4,7 +4,9 @@
 import logging
 from random import random
 
+from zope.event import notify
 from zope.interface import implementer
+from zope.globalrequest import getRequest
 from ZODB.POSException import POSKeyError
 
 import DateTime
@@ -13,17 +15,19 @@ from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view
 from eea.sparql.cache import cacheSparqlKey, ramcache, cacheSparqlMethodKey
 from eea.sparql.converter.sparql2json import sparql2json
+from eea.sparql.events import SparqlBookmarksFolderAdded
 from eea.sparql.interfaces import ISparqlQuery
 from plone import namedfile
 from plone.dexterity.content import Container, DexterityContent
 from plone.folder.ordered import CMFOrderedBTreeFolderBase
+from Products.CMFCore.utils import getToolByName
+from Products.statusmessages.interfaces import IStatusMessage
 from Products.ZSPARQLMethod.Method import (QueryTimeout, ZSPARQLMethod,
                                            interpolate_query, map_arg_values,
                                            parse_arg_spec,
                                            query_and_get_result,
                                            raw_query_and_get_result,
                                            run_with_timeout)
-
 
 
 logger = logging.getLogger("eea.sparql")
@@ -40,6 +44,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
     """ Sparql query implementaiton in dexterity"""
 
     security = ClassSecurityInfo()
+    # __allow_access_to_unprotected_subobjects__ = 1
 
     def __init__(self, id=None, **kwargs):
         """ Initialize cache fields """
@@ -50,6 +55,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
         self.sparql_results_cached_json = namedfile.NamedBlobFile()
         self.sparql_results_cached_xml = namedfile.NamedBlobFile()
         self.sparql_results_cached_xmlschema = namedfile.NamedBlobFile()
+        self.sparql_results_are_cached = False
 
     @security.protected('View')
     def index_html(self, REQUEST=None, **kwargs):
@@ -81,19 +87,18 @@ class SparqlQuery(Container, ZSPARQLMethod):
 
         return self.execute(**self.map_arguments(**arg_values))
 
-    # @security.public("getTimeout")
-    # def getTimeout(self):
-    #     """timeout"""
-    #
-    #     return str(self.timeout)
-    #
-    # @security.public("setTimeout")
-    # def setTimeout(self, value):
-    #     """timeout"""
-    #     try:
-    #         self.timeout = int(value)
-    #     except Exception:
-    #         self.timeout = 10
+    @security.public
+    def getTimeout(self):
+        """timeout"""
+        return str(self.timeout)
+
+    @security.public
+    def setTimeout(self, value):
+        """timeout"""
+        try:
+            self.timeout = int(value)
+        except Exception:
+            self.timeout = 10
 
     @ramcache(cacheSparqlMethodKey, dependencies=['eea.sparql'])
     def _getCachedSparqlResults(self):
@@ -128,6 +133,8 @@ class SparqlQuery(Container, ZSPARQLMethod):
         empty_result = {"result": {"rows": "", "var_names": "",
                                     "has_result": ""}}
 
+        if field is None:
+            return empty_result
         if field.getSize() == 0:
             return empty_result
 
@@ -194,6 +201,79 @@ class SparqlQuery(Container, ZSPARQLMethod):
         else:
             return arg_values
 
+    security.declareProtected(view, 'updateLastWorkingResults')
+    def updateLastWorkingResults(self, **arg_values):
+        """ update cached last working results of a query (json exhibit)
+        """
+        cached_result = self.getSparqlCacheResults()
+        try:
+            cooked_query = interpolate_query(self.query, arg_values)
+        except:
+            import pdb; pdb.set_trace()
+        args = (self.endpoint_url, cooked_query)
+        try:
+            new_result = run_with_timeout(
+                max(getattr(self, 'timeout', 10), 10),
+                query_and_get_result,
+                *args)
+        except QueryTimeout:
+            new_result = {'exception': "query has ran - an timeout has"
+                                       " been received"}
+        force_save = False
+
+        if new_result.get("result", {}) != {}:
+            if new_result != cached_result:
+                if new_result.get("result", {}).get("rows", {}):
+                    force_save = True
+                else:
+                    if not cached_result.get('result', {}).get('rows', {}):
+                        force_save = True
+
+        comment = "query has run - no result changes"
+        if force_save:
+            self.setSparqlCacheResults(new_result)
+            self._updateOtherCachedFormats(self.endpoint_url, cooked_query)
+
+            new_sparql_results = []
+            rows = new_result.get('result', {}).get('rows', {})
+            if rows:
+                for row in rows:
+                    for val in row:
+                        new_sparql_results.append(val.value + " | ")
+                new_sparql_results[-1] = new_sparql_results[-1][0:-3]
+            new_sparql_results_str = "".join(new_sparql_results) + "\n"
+            self.sparql_results = new_sparql_results_str
+            comment = "query has run - result changed"
+
+        request = getRequest()
+        messages = IStatusMessage(request)
+        messages.add(u"Query Saved. %s" % comment, type=u"warn")
+
+        if new_result.get('exception', None):
+            cached_result['exception'] = new_result['exception']
+            self.setSparqlCacheResults(cached_result)
+
+    def _updateOtherCachedFormats(self, endpoint, query):
+        """ Run and store queries in sparql endpoints for xml, xmlschema, json
+        """
+
+        for _type, accept in RESULTS_TYPES.items():
+            updateOtherCachedFormats(self, endpoint, query, _type, accept)
+
+    security.declareProtected(view, 'invalidateWorkingResult')
+    def invalidateWorkingResult(self):
+        """ invalidate working results"""
+        self.sparql_results = ""
+        self.invalidateSparqlCacheResults()
+
+        pr = getToolByName(self, 'portal_repository')
+        comment = "Invalidated last working result"
+        comment = comment.encode('utf')
+        pr.save(obj=self, comment=comment)
+
+        self.scheduled_at = DateTime.DateTime()
+        updateLastWorkingResults(self, scheduled_at, False)
+
 
 def generateUniqueId(type_name):
     """ generateUniqueIds for sparqls
@@ -209,3 +289,47 @@ def generateUniqueId(type_name):
     prefix = prefix.lower()
 
     return prefix + time + rand + suffix
+
+
+def updateLastWorkingResults(obj, scheduled_at, bookmarks_folder_added=False):
+    """ Update last working results
+    """
+    import pdb; pdb.set_trace()
+    obj.updateLastWorkingResults()
+
+    if bookmarks_folder_added:
+        event = SparqlBookmarksFolderAdded(obj)
+        notify(event)
+        bookmarks_folder_added = False
+
+
+def updateOtherCachedFormats(obj, endpoint, query, _type, accept):
+    """ Async that updates json, xml, xmlschema exports
+    """
+
+    timeout = max(getattr(obj, 'timeout', 10), 10)
+    try:
+        new_result = run_with_timeout(
+            timeout,
+            raw_query_and_get_result, endpoint, query, accept=accept
+        )
+    except QueryTimeout:
+        new_result = ""
+        logger.warning(
+            "Query received timeout: %s with %s\n %s \n %s",
+            "/".join(obj.getPhysicalPath()), _type, endpoint, query
+        )
+        return
+
+    fieldName = "sparql_results_cached_" + _type
+    _attr = getattr(obj, fieldName)
+
+    try:
+        result = new_result['result'].read()
+    except Exception:
+        result = ""
+        logger.warn(
+            "Unable to read result from query: %s with %s\n %s \n %s",
+            "/".join(obj.getPhysicalPath()), _type, endpoint, query
+        )
+    _attr._setData(cPickle.dumps(result))

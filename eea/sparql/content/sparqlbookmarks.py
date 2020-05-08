@@ -12,11 +12,12 @@ from AccessControl.SecurityManagement import (newSecurityManager,
 from eea.sparql.content.sparqlquery import generateUniqueId, SparqlQuery
 from eea.sparql.interfaces import ISparqlBookmarksFolder
 # from Products.CMFCore.utils import getToolByName
-from plone.dexterity.content import Container
+from plone import namedfile
+from plone.dexterity.content import Container, DexterityContent
+from plone.folder.ordered import CMFOrderedBTreeFolderBase
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from zope.component import getUtility
 from zope.interface import implementer
-
 
 logger = logging.getLogger("eea.sparql")
 
@@ -26,6 +27,18 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
     """Sparql Bookmarks Folder"""
 
     security = ClassSecurityInfo()
+    # __allow_access_to_unprotected_subobjects__ = 1
+
+    def __init__(self, id=None, **kwargs):
+        """ Initialize cache fields """
+        CMFOrderedBTreeFolderBase.__init__(self, id)
+        DexterityContent.__init__(self, id, **kwargs)
+
+        self.sparql_results_cached = namedfile.NamedBlobFile()
+        self.sparql_results_cached_json = namedfile.NamedBlobFile()
+        self.sparql_results_cached_xml = namedfile.NamedBlobFile()
+        self.sparql_results_cached_xmlschema = namedfile.NamedBlobFile()
+        self.sparql_results_are_cached = False
 
     def checkQuery(self, title, endpoint, query):
         """Check if a query already exists
@@ -103,6 +116,7 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
                 # TODO: versions not ported yet
                 # ob = versions.create_version(ob)
                 setattr(ob, 'sparql_query', query)
+                import pdb; pdb.set_trace()
                 if getattr(ob, 'reindexObject', None) is not None:
                     ob.reindexObject()
                 # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
@@ -134,7 +148,7 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
 
         for query in queries:
             query_name = query[0].value
-            query_sparql = query[2].value
+            query_sparql = query[1].value
             self.addOrUpdateQuery(query_name,
                                   self.endpoint_url,
                                   query_sparql)
