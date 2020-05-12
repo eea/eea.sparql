@@ -106,7 +106,6 @@ class SparqlQuery(Container, ZSPARQLMethod):
         :return: Cached Sparql results
         :rtype: object
         """
-        # NOT TESTED
         empty_result = {"result": {"rows": "", "var_names": "",
                                     "has_result": ""}}
         try:
@@ -145,7 +144,6 @@ class SparqlQuery(Container, ZSPARQLMethod):
     def setSparqlCacheResults(self, result):
         """ Set Sparql Cache results
         """
-        # TODO: TEST
         self.updateExportStatus(result)
         self.sparql_results_are_cached = True
         self.sparql_results_cached._setData(cPickle.dumps(result))
@@ -161,7 +159,6 @@ class SparqlQuery(Container, ZSPARQLMethod):
     def updateExportStatus(self, result):
         """ Update export status of HTML/CSV/TSV
         """
-        # TODO: TEST
         setattr(self, 'exportWorks', True)
         try:
             setattr(self, 'exportWorks', True)
@@ -206,10 +203,8 @@ class SparqlQuery(Container, ZSPARQLMethod):
         """ update cached last working results of a query (json exhibit)
         """
         cached_result = self.getSparqlCacheResults()
-        try:
-            cooked_query = interpolate_query(self.query, arg_values)
-        except:
-            import pdb; pdb.set_trace()
+        cooked_query = interpolate_query(self.query, arg_values)
+
         args = (self.endpoint_url, cooked_query)
         try:
             new_result = run_with_timeout(
@@ -271,8 +266,7 @@ class SparqlQuery(Container, ZSPARQLMethod):
         comment = comment.encode('utf')
         pr.save(obj=self, comment=comment)
 
-        self.scheduled_at = DateTime.DateTime()
-        updateLastWorkingResults(self, scheduled_at, False)
+        updateLastWorkingResults(self, False)
 
 
 def generateUniqueId(type_name):
@@ -291,7 +285,7 @@ def generateUniqueId(type_name):
     return prefix + time + rand + suffix
 
 
-def updateLastWorkingResults(obj, scheduled_at, bookmarks_folder_added=False):
+def updateLastWorkingResults(obj, bookmarks_folder_added=False):
     """ Update last working results
     """
     import pdb; pdb.set_trace()

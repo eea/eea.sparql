@@ -9,9 +9,9 @@ import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import re
 import DateTime
+import pickle as cPickle
 from io import StringIO
 from time import time
-
 
 from plone import api
 from Products.CMFCore.utils import getToolByName
@@ -278,11 +278,12 @@ class Sparql(BrowserView):
         output.seek(0)
         return output.read()
 
-
-    def sparqlTriggerAsync(self, cached_data):
-        """ Verify if cached data exists, if not trigger async job
+    def sparqlTriggerDataCache(self, cached_data):
+        """ Verify if cached data exists, if not create it
         """
-        if not cached_data or (cached_data and not cached_data.get_size()):
+        # if not cached_data or (cached_data and not cached_data.get_size()):
+        if not cached_data:
+            import pdb; pdb.set_trace()
             self.context.last_scheduled_at = DateTime.DateTime()
             self.context._updateOtherCachedFormats(
                 self.context.last_scheduled_at,
@@ -292,7 +293,6 @@ class Sparql(BrowserView):
                 message="The data will be updated shortly. Please retry later.",
                 request=self.request)
             return self.request.response.redirect(self.context.absolute_url())
-
 
     def sparql2tsv(self, dialect='excel.tsv'):
         """ Download sparql results as Tab Separated File
@@ -307,11 +307,15 @@ class Sparql(BrowserView):
         self.request.response.setHeader(
             'Content-Disposition',
             'attachment; filename="%s.json"' % self.context.getId())
+        field = self.context.sparql_results_cached_json
+        data = cPickle.loads(field._getData())
 
-        cached_json = self.context.getSparql_results_cached_json()
-        self.sparqlTriggerAsync(cached_json)
+        self.sparqlTriggerDataCache(data)
 
-        return self.context.getSparql_results_cached_json()
+        field = self.context.sparql_results_cached_json
+        data = cPickle.loads(field._getData())
+
+        return data
 
     def sparql2xml(self):
         """ Download sparql results as XML
@@ -321,11 +325,15 @@ class Sparql(BrowserView):
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.xml"' % self.context.getId())
+        field = self.context.sparql_results_cached_xml
+        data = cPickle.loads(field._getData())
 
-        cached_xml = self.context.getSparql_results_cached_xml()
-        self.sparqlTriggerAsync(cached_xml)
+        self.sparqlTriggerDataCache(data)
 
-        return self.context.getSparql_results_cached_xml()
+        field = self.context.sparql_results_cached_xml
+        data = cPickle.loads(field._getData())
+
+        return data
 
     def sparql2xmlWithSchema(self):
         """ Download sparql results as XML with schema
@@ -335,11 +343,15 @@ class Sparql(BrowserView):
         self.request.response.setHeader(
             'Content-Disposition',
                 'attachment; filename="%s.schema.xml"' % self.context.getId())
+        field = self.context.sparql_results_cached_xmlschema
+        data = cPickle.loads(field._getData())
 
-        cached_xml_schema = self.context.getSparql_results_cached_xmlschema()
-        self.sparqlTriggerAsync(cached_xml_schema)
+        self.sparqlTriggerDataCache(data)
 
-        return self.context.getSparql_results_cached_xmlschema()
+        field = self.context.sparql_results_cached_xmlschema
+        data = cPickle.loads(field._getData())
+
+        return data
 
     def sparql2response(self, headers=None):
         """ Write

@@ -47,18 +47,13 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
            2 - exists but changed"""
         found = False
         changed = True
-
         for sparql in self.values():
             if sparql.title == title:
                 found = True
-                break
-                # import pdb; pdb.set_trace() #TODO: IGetVersions not ported
-                latest_sparql = IGetVersions(sparql).latest_version()
-                found = True
 
-                if latest_sparql.query_with_comments == query:
+                import pdb; pdb.set_trace()
+                if sparql.query_with_comments == query:
                     changed = False
-
                 break
 
         if not found:
@@ -74,7 +69,6 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
            Create new version"""
         oldSecurityManager = getSecurityManager()
         newSecurityManager(None, SpecialUsers.system)
-
         ob = None
 
         changed = True
@@ -82,20 +76,19 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
         for sparql in self.values():
             if sparql.title == title:
                 ob = sparql
-                break
-                # import pdb; pdb.set_trace() # IGetVersions not available yet
-                x1 = IGetVersions(sparql)
-                latest_sparql = x1.latest_version()
-                ob = latest_sparql
 
-                if latest_sparql.query_with_comments == query:
+                import pdb; pdb.set_trace()
+                if sparql.query_with_comments == query:
                     changed = False
-
                 break
 
         if not ob:
             _id = generateUniqueId("SparqlQuery")
-            _id = self.invokeFactory(type_name="SparqlQuery", id=_id)
+            try:
+                _id = self.invokeFactory(type_name="SparqlQuery", id=_id, sparql_query=query)
+            except:
+                import pdb; pdb.set_trace()
+                _id = self.invokeFactory(type_name="SparqlQuery", id=_id, sparql_query=query)
             ob = self[_id]
 
             setattr(ob, 'endpoint_url', endpoint)
@@ -110,17 +103,14 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             new_id = normalizer.normalize(title)
 
             ob.aq_parent.manage_renameObject(_id, new_id)
-            # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
+            ob.invalidateWorkingResult() # TODO: Use rabbitmq
         else:
             if changed:
-                # TODO: versions not ported yet
-                # ob = versions.create_version(ob)
-                setattr(ob, 'sparql_query', query)
                 import pdb; pdb.set_trace()
+                setattr(ob, 'sparql_query', query)
                 if getattr(ob, 'reindexObject', None) is not None:
                     ob.reindexObject()
-                # ob.invalidateWorkingResult() # TODO: Reimplement when async is available
-
+                ob.invalidateWorkingResult() # TODO: Use rabbitmq
         setSecurityManager(oldSecurityManager)
 
         return ob
@@ -133,22 +123,15 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
         for sparql in self.values():
             if sparql.title == title:
                 ob = sparql
-                break # IGetVersions not available yet
-                # import pdb; pdb.set_trace()
-                latest_sparql = IGetVersions(sparql).latest_version()
-                ob = latest_sparql
-
                 break
-
         return ob
 
     def syncQueries(self):
         """sync all queries from bookmarks"""
         queries = self.execute().get('result', {}).get('rows', {})
-
         for query in queries:
             query_name = query[0].value
-            query_sparql = query[1].value
+            query_sparql = query[2].value
             self.addOrUpdateQuery(query_name,
                                   self.endpoint_url,
                                   query_sparql)

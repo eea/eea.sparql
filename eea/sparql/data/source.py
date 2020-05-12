@@ -3,6 +3,7 @@
 
 from zope.interface import implements
 
+# eea.app.visualization not ported to py3 yet
 try:
     from eea.app.visualization.data.source import MultiDataProvenance
     from eea.app.visualization.interfaces import IMultiDataProvenance

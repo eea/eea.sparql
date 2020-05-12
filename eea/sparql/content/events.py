@@ -51,10 +51,9 @@ def sparql_archetypes_modified(obj, evt):
 
 def sparql_added_or_modified(obj, evt):
     """Update last working results when sparql is added or modified"""
-    obj.scheduled_at = DateTime.DateTime()
     bookmarks_folder_added = False
     if ISparqlBookmarksFolder.providedBy(obj) and \
             IObjectCreatedEvent.providedBy(evt):
         bookmarks_folder_added = True
 
-    updateLastWorkingResults(obj, obj.scheduled_at, bookmarks_folder_added)
+    updateLastWorkingResults(obj, bookmarks_folder_added)
