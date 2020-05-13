@@ -18,7 +18,7 @@ from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import applyProfile
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import FunctionalTesting
-# from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
+from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 
 try:
     from Zope2.App import zcml
@@ -35,7 +35,7 @@ except ImportError:
 class EEAFixture(PloneSandboxLayer):
     """ EEA Testing Policy
     """
-    defaultBases = (PLONE_FIXTURE,)
+    defaultBases = (PLONE_APP_CONTENTTYPES_FIXTURE,)
 
     def setUpZope(self, app, configurationContext):
         """ Setup Zope

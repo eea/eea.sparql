@@ -8,7 +8,6 @@ from eea.sparql.tests import base
 from plone.testing import layered
 
 
-
 def test_suite():
     """ Suite
     """

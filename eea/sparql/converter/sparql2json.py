@@ -82,30 +82,7 @@ def sparql2json(data, **kwargs):
         >>> test_data = mock_data.loadSparql()
         >>> data = sparql2json(test_data)
         >>> print (data['items'])
-        [{'name': u'NAME',
-        'double': 2.5,
-        'decimal': 5.21,
-        'float': 4.5,
-        'long': 15,
-        'label': 0,
-        'boolean': True,
-        'time': '2012-01-10 14:31:27',
-        'date': '14:31:03',
-        'integer': 1,
-        'datetime': '2012-01-10',
-        'string': u'STRING'},
-        {'name': u'',
-        'double': 0.0,
-        'decimal': 0.0,
-        'float': 0.0,
-        'long': 0,
-        'label': 1,
-        'boolean': False,
-        'time': '',
-        'date': '',
-        'integer': 0,
-        'datetime': '',
-        'string': u''}]
+        [{'label': 0, 'name': 'NAME', 'string': 'STRING', 'integer': 1, 'long': 15, 'double': 2.5, 'float': 4.5, 'decimal': 5.21, 'datetime': '2012-01-10', 'date': '14:31:03', 'time': '2012-01-10 14:31:27', 'boolean': True}, {'label': 1, 'name': '', 'string': '', 'integer': 0, 'long': 0, 'double': 0.0, 'float': 0.0, 'decimal': 0.0, 'datetime': '', 'date': '', 'time': '', 'boolean': False}]
 
     """
     column_types = kwargs.get('column_types') or []

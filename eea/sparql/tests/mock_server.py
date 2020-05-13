@@ -22,9 +22,15 @@ class Handler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
         f = open(json_file, 'rb')
         json_str = f.read()
         f.close()
-        # import pdb; pdb.set_trace()
+        # in the py2 version we used print json_str in order to get the results
+        # in py3 we can no longer do this because of str/bytes str
+        # the py3 sockerwriter accepts only bytes in its write function and when
+        # we wrap it with the print function, the data is converted to str
+        # thus resulting in an error
+        # either of the below options is workable in order to write bytes to
+        # the socket, unfortunately newlines are not preserved
         sys.stdout.write(json_str)
-        # print(json_str, file=sys.stdout)
+        # sys.stdout.writelines(json_str.split(b'\n'))
         sys.stdout = stdout
 
     def do_GET(self):
