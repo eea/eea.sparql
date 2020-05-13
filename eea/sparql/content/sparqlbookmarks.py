@@ -7,11 +7,8 @@ from AccessControl import ClassSecurityInfo
 from AccessControl import getSecurityManager, SpecialUsers
 from AccessControl.SecurityManagement import (newSecurityManager,
                                               setSecurityManager)
-# from eea.versions import versions # TODO: Port eea.versions
-# from eea.versions.interfaces import IGetVersions
 from eea.sparql.content.sparqlquery import generateUniqueId, SparqlQuery
 from eea.sparql.interfaces import ISparqlBookmarksFolder
-# from Products.CMFCore.utils import getToolByName
 from plone import namedfile
 from plone.dexterity.content import Container, DexterityContent
 from plone.folder.ordered import CMFOrderedBTreeFolderBase

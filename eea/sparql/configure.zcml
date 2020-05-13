@@ -9,13 +9,11 @@
   <include file="permissions.zcml" />
   <include file="skins.zcml" />
 
-  <!-- <include package=".async" /> -->
   <include package=".browser" />
   <include package=".cache" />
   <include package=".content" />
-   <include package=".data" />
-  <!-- <include package=".upgrades" /> -->
-
+  <include package=".data" />
   <include package=".restapi" />
+  <include package=".upgrades" />
 
 </configure>

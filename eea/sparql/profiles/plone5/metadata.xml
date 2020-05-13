@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <metadata>
- <version>8000</version>
+ <version>1000</version>
  <dependencies>
   <dependency>profile-eea.sparql:default</dependency>
  </dependencies>

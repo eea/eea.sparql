@@ -298,7 +298,7 @@ def updateLastWorkingResults(obj, bookmarks_folder_added=False):
 
 
 def updateOtherCachedFormats(obj, endpoint, query, _type, accept):
-    """ Async that updates json, xml, xmlschema exports
+    """ Updates json, xml, xmlschema exports, TODO: Port to rabbitmq
     """
 
     timeout = max(getattr(obj, 'timeout', 10), 10)

@@ -8,8 +8,6 @@ import eea.sparql
 from eea.sparql.tests.mock_server import PORT
 from eea.sparql.tests.mock_server import Handler
 
-from Products.Five import fiveconfigure
-from Testing import ZopeTestCase as ztc
 #
 # Layered testing
 #
@@ -20,7 +18,7 @@ from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import applyProfile
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import FunctionalTesting
-
+# from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 
 try:
     from Zope2.App import zcml

@@ -3,14 +3,6 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     i18n_domain="eea.sparql">
 
-    <!--<browser:page-->
-    <!--    name="sparql-schedule-controlpanel"-->
-    <!--    for="zope.interface.Interface"-->
-    <!--    class=".controlpanel.ScheduleStatus"-->
-    <!--    permission="eea.sparql.add"-->
-    <!--    allowed_interface=".controlpanel.IScheduleStatus"-->
-    <!--    />-->
-
     <browser:page
         for="*"
         name="test_query"

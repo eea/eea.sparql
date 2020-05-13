@@ -4,8 +4,6 @@
 import unittest
 import doctest
 
-from Testing import ZopeTestCase as ztc
-
 from eea.sparql.tests import base
 from plone.testing import layered
 

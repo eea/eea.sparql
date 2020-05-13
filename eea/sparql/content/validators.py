@@ -79,7 +79,7 @@ class SparqlQueryValidator(object):
         """ Check if provided query is within size limit """
         obj = kwargs.get('instance')
         request = kwargs['REQUEST']
-        if 'atct_edit' not in request.URL0:
+        if 'edit' not in request.URL0:
             return 1
 
         arg_spec = (obj.endpoint_url, value)
@@ -93,3 +93,42 @@ class SparqlQueryValidator(object):
             IStatusMessage(request).addStatusMessage(msg, type='warning')
             return 1
         return 1
+
+# Wrap it in a validator
+# on edit save check with the validator
+# Option 1. Return to edit
+# Option 2. Proceed with the changes
+
+# from z3c.form import validator
+# from Acquisition import aq_inner
+# from z3c.form.interfaces import IValidator
+# from zope.component import getMultiAdapter, provideAdapter
+# from zope.schema import ValidationError
+# from plone.formwidget.captcha import CaptchaMessageFactory as _
+
+
+# from eea.sparql.interfaces import ISparqlQuery
+
+# CaptchaForm = wrap_form(ContactForm)
+
+# # Register Captcha validator for the captcha field in the ISparqlQuery
+# validator.WidgetValidatorDiscriminators(
+#     SparqlValidator, field=ISparqlQuery['sparql_query'])
+
+# class SparqlValidatorError(ValidationError):
+#     __doc__ = _(u"The code you entered was wrong, please enter the new one.")
+
+
+# class SparqlValidator(validator.SimpleFieldValidator):
+
+#     def validate(self, value):
+#         super(SparqlValidator, self).validate(value)
+#         sparql_query = getMultiAdapter((aq_inner(self.context), self.request),
+#                                   name='sparql_query')
+#         import pdb; pdb.set_trace()
+#         if value:
+#             if not sparql_query.verify(value):
+#                 raise SparqlValidatorError
+#             else:
+#                 return True
+#         raise SparqlValidatorError

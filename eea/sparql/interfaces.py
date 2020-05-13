@@ -1,19 +1,17 @@
 """ Sparql interfaces module
 """
 
-from zope import schema, component
+from zope import schema
 from zope.component.interfaces import IObjectEvent
 from zope.interface import Interface
 
-from collective.z3cform.datagridfield import DictRow, DataGridFieldFactory
+from collective.z3cform.datagridfield import DictRow
 from eea.sparql import sparqlMessageFactory as _
 
 from plone.autoform import directives
 from plone.namedfile.field import NamedBlobFile
 from plone.supermodel import model
-from plone.supermodel.directives import fieldset, primary
 
-from z3c.form import form, widget, field
 from z3c.form.interfaces import IAddForm, IEditForm
 
 
@@ -113,18 +111,5 @@ class ISparqlBookmarksFolder(ISparqlQuery):
 
 
 class ISparqlBookmarksFolderAdded(IObjectEvent):
-    """An event signalling that the sparql bookmarks folder was added
-    """
-
-
-class ISparqlArchetypes(Interface):
-    """ISparql"""
-
-
-class ISparqlBookmarksFolderArchetypes(ISparqlArchetypes):
-    """ISparqlBookmarksFolder"""
-
-
-class ISparqlBookmarksFolderAddedArchetypes(IObjectEvent):
     """An event signalling that the sparql bookmarks folder was added
     """

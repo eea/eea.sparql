@@ -4,8 +4,4 @@
     meta_type="Dexterity FTI" />
   <object name="SparqlBookmarksFolder"
     meta_type="Dexterity FTI" />
-  <!-- <object name="Sparql" -->
-  <!--   meta_type="Factory&#45;based Type Information with dynamic views" /> -->
-  <!-- <object name="SparqlBookmarksFolder" -->
-  <!--   meta_type="Factory&#45;based Type Information with dynamic views" /> -->
 </object>

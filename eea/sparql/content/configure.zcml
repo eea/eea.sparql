@@ -4,8 +4,6 @@
   xmlns:zcml="http://namespaces.zope.org/zcml"
   i18n_domain="eea.sparql">
 
-    <include zcml:condition="installed Products.Archetypes" file="archetypes.zcml" />
-
     <subscriber
         for="eea.sparql.interfaces.ISparqlBookmarksFolder
              eea.sparql.interfaces.ISparqlBookmarksFolderAdded"

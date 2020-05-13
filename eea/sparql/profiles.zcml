@@ -28,15 +28,6 @@
     />
 
   <genericsetup:registerProfile
-    zcml:condition="installed Products.Archetypes"
-    name="archetypes"
-    directory="profiles/archetypes"
-    title="EEA Sparql Plone5 Archetype content types"
-    description="Extension profile for EEA Sparql Plone5."
-    provides="Products.GenericSetup.interfaces.EXTENSION"
-    />
-
-  <genericsetup:registerProfile
     name="uninstall"
     title="EEA Sparql (uninstall)"
     directory="profiles/uninstall"
@@ -50,11 +41,4 @@
     name="eea.sparql-hiddenprofiles"
     />
 
-    <!-- <genericsetup:registerProfile -->
-      <!--         name="upgrade36" -->
-      <!--         title="EEA Sparql upgrade profile for v3.6" -->
-      <!--         directory="profiles/upgrades/to_36" -->
-      <!--         description='EEA Sparql upgrade profile for v3.6' -->
-      <!--         provides="Products.GenericSetup.interfaces.EXTENSION" /> -->
-      <!--  -->
 </configure>

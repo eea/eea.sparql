@@ -15,18 +15,4 @@
     description="Add Sparql Bookmarks Folder"
     />
 
-  <permission
-    zcml:condition="installed Products.Archetypes"
-    id="eea.sparql.archetypes.add"
-    title="eea.sparql: Add Sparql Archetypes"
-    description="Add Sparql Archetypes"
-    />
-
-  <permission
-    zcml:condition="installed Products.Archetypes"
-    id="eea.sparql.archetypes.bookmarksfolder.add"
-    title="eea.sparql: Add Sparql Archetypes Bookmarks Folder"
-    description="Add Sparql Archetypes Bookmarks Folder"
-    />
-
 </configure>
