@@ -48,7 +48,6 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             if sparql.title == title:
                 found = True
 
-                import pdb; pdb.set_trace()
                 if sparql.query_with_comments == query:
                     changed = False
                 break
@@ -74,7 +73,6 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             if sparql.title == title:
                 ob = sparql
 
-                import pdb; pdb.set_trace()
                 if sparql.query_with_comments == query:
                     changed = False
                 break
@@ -103,7 +101,6 @@ class SparqlBookmarksFolder(Container, SparqlQuery):
             ob.invalidateWorkingResult() # TODO: Use rabbitmq
         else:
             if changed:
-                import pdb; pdb.set_trace()
                 setattr(ob, 'sparql_query', query)
                 if getattr(ob, 'reindexObject', None) is not None:
                     ob.reindexObject()

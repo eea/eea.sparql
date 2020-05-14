@@ -191,6 +191,13 @@ class SparqlQuery(Container, ZSPARQLMethod):
         """
         arg_string = ' '.join([arg['name'] for arg in (self.arg_spec or [])])
         arg_spec = parse_arg_spec(arg_string)
+
+        if arg_values in [None, [], {}]:
+            arg_values = {}
+            for spec in self.arg_spec:
+                key = spec['name'].split(':')[0]
+                value = spec['query']
+                arg_values.update({key: value})
         missing, arg_values = map_arg_values(arg_spec, arg_values)
 
         if missing:
@@ -203,8 +210,9 @@ class SparqlQuery(Container, ZSPARQLMethod):
         """ update cached last working results of a query (json exhibit)
         """
         cached_result = self.getSparqlCacheResults()
+        if arg_values in [{}, [], None]:
+            arg_values = self.map_arguments()
         cooked_query = interpolate_query(self.query, arg_values)
-
         args = (self.endpoint_url, cooked_query)
         try:
             new_result = run_with_timeout(
@@ -234,7 +242,10 @@ class SparqlQuery(Container, ZSPARQLMethod):
             if rows:
                 for row in rows:
                     for val in row:
-                        new_sparql_results.append(val.value + " | ")
+                        if val is None:
+                            new_sparql_results.append("" + " | ")
+                        else:
+                            new_sparql_results.append(val.value + " | ")
                 new_sparql_results[-1] = new_sparql_results[-1][0:-3]
             new_sparql_results_str = "".join(new_sparql_results) + "\n"
             self.sparql_results = new_sparql_results_str
@@ -288,7 +299,6 @@ def generateUniqueId(type_name):
 def updateLastWorkingResults(obj, bookmarks_folder_added=False):
     """ Update last working results
     """
-    import pdb; pdb.set_trace()
     obj.updateLastWorkingResults()
 
     if bookmarks_folder_added:
