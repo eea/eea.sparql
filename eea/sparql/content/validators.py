@@ -1,24 +1,22 @@
 """ Custom AT Validators
 """
+from Products.CMFCore.utils import getToolByName
 from Products.statusmessages.interfaces import IStatusMessage
-from Products.validation.interfaces.IValidator import IValidator
-from Products.ZSPARQLMethod.Method import run_with_timeout
+from Products.ZSPARQLMethod.Method import run_with_timeout, interpolate_query
 from Products.ZSPARQLMethod.Method import query_and_get_result
+from plone.api.portal import getSite
 from zope.annotation import IAnnotations
 from zope.interface import implements
-
-sparql = __import__('SparqlArchetypes')
+from zope.globalrequest import getRequest
 
 
 class SparqlQueryValidator(object):
     """ Validator
     """
-    implements(IValidator)
 
-    def __init__(self, name, title='Sparql Query result size',
+    def __init__(self, title='Sparql Query result size',
                  description='Check if sparql_query result is too big'):
-        self.name = name
-        self.title = title or name
+        self.title = title
         self.description = description
 
     def count_sparql_results(self, timeout, func, *query):
@@ -54,8 +52,6 @@ class SparqlQueryValidator(object):
             result_len = len(result.get('result', {}).get('rows', {}))
         return result_len
 
-
-
     def run_query(self, request, func, query):
         """
         :param request: Object request
@@ -77,15 +73,20 @@ class SparqlQueryValidator(object):
 
     def __call__(self, value, *args, **kwargs):
         """ Check if provided query is within size limit """
-        obj = kwargs.get('instance')
-        request = kwargs['REQUEST']
+        request = getRequest()
         if 'edit' not in request.URL0:
             return 1
 
-        arg_spec = (obj.endpoint_url, value)
+        arg_values = value.__context__.map_arguments()
+        cooked_query = interpolate_query(value.__context__.query, arg_values)
+        arg_spec = (value.endpoint_url, cooked_query)
+
         results_len = self.run_query(request, query_and_get_result, arg_spec)
-        pprop = obj.portal_properties
-        site_props = getattr(pprop, 'site_properties', None)
+
+        site = getSite()
+        pptool = getToolByName(site, 'portal_properties')
+        site_props = getattr(pptool, 'site_properties', None)
+
         max_rows = site_props.getProperty('sparql_max_row_length', 9000)
         sparql_msg = site_props.getProperty('sparql_max_row_msg', "%s %s")
         msg = sparql_msg % (results_len, max_rows)
@@ -93,42 +94,3 @@ class SparqlQueryValidator(object):
             IStatusMessage(request).addStatusMessage(msg, type='warning')
             return 1
         return 1
-
-# Wrap it in a validator
-# on edit save check with the validator
-# Option 1. Return to edit
-# Option 2. Proceed with the changes
-
-# from z3c.form import validator
-# from Acquisition import aq_inner
-# from z3c.form.interfaces import IValidator
-# from zope.component import getMultiAdapter, provideAdapter
-# from zope.schema import ValidationError
-# from plone.formwidget.captcha import CaptchaMessageFactory as _
-
-
-# from eea.sparql.interfaces import ISparqlQuery
-
-# CaptchaForm = wrap_form(ContactForm)
-
-# # Register Captcha validator for the captcha field in the ISparqlQuery
-# validator.WidgetValidatorDiscriminators(
-#     SparqlValidator, field=ISparqlQuery['sparql_query'])
-
-# class SparqlValidatorError(ValidationError):
-#     __doc__ = _(u"The code you entered was wrong, please enter the new one.")
-
-
-# class SparqlValidator(validator.SimpleFieldValidator):
-
-#     def validate(self, value):
-#         super(SparqlValidator, self).validate(value)
-#         sparql_query = getMultiAdapter((aq_inner(self.context), self.request),
-#                                   name='sparql_query')
-#         import pdb; pdb.set_trace()
-#         if value:
-#             if not sparql_query.verify(value):
-#                 raise SparqlValidatorError
-#             else:
-#                 return True
-#         raise SparqlValidatorError

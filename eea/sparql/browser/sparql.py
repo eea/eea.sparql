@@ -282,7 +282,6 @@ class Sparql(BrowserView):
         """
         # if not cached_data or (cached_data and not cached_data.get_size()):
         if not cached_data:
-            import pdb; pdb.set_trace()
             self.context.last_scheduled_at = DateTime.DateTime()
             self.context._updateOtherCachedFormats(
                 self.context.last_scheduled_at,

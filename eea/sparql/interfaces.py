@@ -28,6 +28,11 @@ class ISparql(Interface):
     """
 
 
+from zope.interface import Invalid
+from zope.interface import invariant
+from eea.sparql.content.validators import SparqlQueryValidator
+
+
 class ISparqlQuery(model.Schema, ISparql):
     """ISparql"""
 
@@ -95,6 +100,13 @@ class ISparqlQuery(model.Schema, ISparql):
         values=[u'Once', u'Hourly', u'Daily', u'Weekly'],
         default=_(u'Weekly')
     )
+
+    @invariant
+    def sparql_query_invariant(data):
+        valid = SparqlQueryValidator()
+        result = valid(data)
+        if result != 1:
+            raise Invalid(_('Query Error'))
 
     directives.omitted(IEditForm, 'sparql_results_cached')
     directives.omitted(IAddForm, 'sparql_results_cached')
